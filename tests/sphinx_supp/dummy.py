@@ -15,7 +15,7 @@ def test_func():
     pass
 
 
-class CallTestClass(object):
+class Class_CallTest(object):
     """A class defining a __call__ method"""
 
     def __get__(self, instance, owner):
@@ -49,7 +49,7 @@ class TestClass(object):
     #: to test if the class attribute is included
     test_attr = None
 
-    class_caller = CallTestClass()
+    class_caller = Class_CallTest()
 
     #: data to be included
     large_data = 'Should be included'
