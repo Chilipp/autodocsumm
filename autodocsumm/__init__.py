@@ -375,7 +375,8 @@ class AutoSummDirective(AutoDirective, Autosummary):
         summ_nodes = self.autosumm_nodes(documenter, grouped_documenters)
 
         dn = summ_nodes.pop(documenter.fullname)
-        doc_nodes = self.inject_summ_nodes(doc_nodes, summ_nodes)
+        if self.name == 'automodule':
+            doc_nodes = self.inject_summ_nodes(doc_nodes, summ_nodes)
         # insert the nodes directly after the paragraphs
         if self.name == 'autoclass':
             for node in dn[::-1]:
@@ -384,15 +385,21 @@ class AutoSummDirective(AutoDirective, Autosummary):
         elif self.name == 'automodule':
             # insert table before the documentation of the members
             istart = 2 if 'noindex' not in self.options else 0
+            # if we have a title in the module, we look for the section
+            if isinstance(doc_nodes[istart], nodes.section):
+                others = doc_nodes[istart]
+                istart = 2  # skip the title
+            else:
+                others = doc_nodes
             found = False
-            if len(doc_nodes[istart:]) >= 2:
-                for i in range(istart, len(doc_nodes)):
-                    if isinstance(doc_nodes[i], sphinx.addnodes.index):
+            if len(others[istart:]) >= 2:
+                for i in range(istart, len(others)):
+                    if isinstance(others[i], sphinx.addnodes.index):
                         found = True
                         break
             if found:
                 for node in dn[::-1]:
-                    doc_nodes.insert(i, node)
+                    others.insert(i, node)
                 dn = []
         return self.warnings + dn + doc_nodes
 
@@ -442,16 +449,22 @@ class AutoSummDirective(AutoDirective, Autosummary):
         Notes
         -----
         `doc_nodes` are modified in place and not copied!"""
-        for i, node in enumerate(doc_nodes):
-            # check if the node has a autosummary table in the summ_nodes
-            if (len(node) and isinstance(node[0], nodes.Element) and
-                    node[0].get('module') and node[0].get('fullname')):
+        def inject_summary(node):
+            if isinstance(node, nodes.section):
+                for sub in node:
+                    inject_summary(sub)
+                return
+            if (len(node) and (isinstance(node, nodes.section) or (
+                    isinstance(node[0], nodes.Element) and
+                    node[0].get('module') and node[0].get('fullname')))):
                 node_summ_nodes = summ_nodes.get("%s.%s" % (
                     node[0]['module'], node[0]['fullname']))
                 if not node_summ_nodes:
-                    continue
+                    return
                 for summ_node in node_summ_nodes[::-1]:
                     self._insert_after_paragraphs(node, summ_node)
+        for node in doc_nodes:
+            inject_summary(node)
         return doc_nodes
 
     def autosumm_nodes(self, documenter, grouped_documenters):

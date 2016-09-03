@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import inspect
 
 master_doc = 'index'
 
@@ -7,14 +6,18 @@ extensions = ['autodocsumm']
 
 autodoc_default_flags = ['show_inheritance', 'autosummary', 'members']
 
-not_document_data = ['dummy.large_data', 'dummy.TestClass.small_data']
+not_document_data = [
+    'dummy.large_data', 'dummy.TestClass.small_data',
+    'dummy_title.large_data', 'dummy_title.TestClass.small_data']
 
 autodata_content = 'both'
 
 
 def member_filter(app, what, name, obj, skip, options):
     import dummy
-    if obj is dummy.TestClass.class_caller:
+    import dummy_title
+    if (obj is dummy.TestClass.class_caller or
+            obj is dummy_title.TestClass.class_caller):
         return False
     return None
 
