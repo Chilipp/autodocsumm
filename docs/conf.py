@@ -63,6 +63,11 @@ master_doc = 'index'
 
 autodoc_default_flags = ['show_inheritance', 'autosummary']
 autoclass_content = 'both'
+autodata_content = 'call'
+
+not_document_data = ['no_data_demo.d']
+
+add_module_names = False
 
 # General information about the project.
 project = u'autodocsumm'
@@ -383,3 +388,44 @@ epub_exclude_files = ['search.html']
 intersphinx_mapping = {
     'sphinx': ('http://sphinx-doc.org/', None),
 }
+
+
+def example_grouper(app, what, name, obj, section, parent):
+    import dummy2
+    if parent is dummy2.MyClass and name == 'some_other_attr':
+        return 'Alternative Section'
+
+
+# -- Extension interface ------------------------------------------------------
+# taken from sphinx conf.py
+
+from sphinx import addnodes  # noqa
+
+event_sig_re = re.compile(r'([a-zA-Z-]+)\s*\((.*)\)')
+
+
+def parse_event(env, sig, signode):
+    m = event_sig_re.match(sig)
+    if not m:
+        signode += addnodes.desc_name(sig, sig)
+        return sig
+    name, args = m.groups()
+    signode += addnodes.desc_name(name, name)
+    plist = addnodes.desc_parameterlist()
+    for arg in args.split(','):
+        arg = arg.strip()
+        plist += addnodes.desc_parameter(arg, arg)
+    signode += plist
+    return name
+
+
+def setup(app):
+    from sphinx.util.docfields import GroupedField
+    app.connect('autodocsumm-grouper', example_grouper)
+    app.add_object_type('confval', 'confval',
+                        objname='configuration value',
+                        indextemplate='pair: %s; configuration value')
+    fdesc = GroupedField('parameter', label='Parameters',
+                         names=['param'], can_collapse=True)
+    app.add_object_type('event', 'event', 'pair: %s; event', parse_event,
+                        doc_field_types=[fdesc])

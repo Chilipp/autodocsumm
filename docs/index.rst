@@ -55,16 +55,59 @@ Extending your autodoc API docs with a summary
 
 .. end-badges
 
-Welcome! This file will be filled with content
+Welcome! This sphinx extension provides some useful extensions to the Sphinxs
+autodoc_ extension. Those are
 
-Documentation
--------------
+1. It creates a *Table of Contents* in the style of the autosummary_ extension
+   with methods, classes, functions and attributes
+2. As you can include the ``__init__`` method documentation for via the
+   :confval:`autoclass_content <sphinx:autoclass_content>` configuration value,
+   we provide the :confval:`autodata_content` configuration value to include
+   the documentation from the ``__call__`` method
+3. You can exclude the string representation of specific objects. E.g. if you
+   have a large dictionary using the :confval:`not_document_data` configuration
+   value.
+
+See the :ref:`examples` section for more details.
+
+.. _autodoc: http://www.sphinx-doc.org/en/stable/ext/autodoc.html
+.. _autosummary: http://www.sphinx-doc.org/en/stable/ext/autosummary.html
+
+
+Content
+-------
 
 .. toctree::
     :maxdepth: 1
 
+    conf_settings
     examples
-    api/autodocsumm
+    api/autodocsumm.rst
+
+
+Installation
+============
+Simply install it via ``pip``::
+
+    $ pip install autodocsumm
+
+Or you install it via::
+
+    $ python setup.py install
+
+from the `source on GitHub`_.
+
+
+.. _source on GitHub: https://github.com/Chilipp/autodocsumm
+
+
+Requirements
+============
+The package only requires Sphinx_ to be installed. It has been tested for
+versions higher than 1.3.
+
+
+.. _Sphinx: http://www.sphinx-doc.org/en/stable
 
 
 Indices and tables

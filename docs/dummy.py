@@ -1,65 +1,26 @@
-# -*- coding: utf-8 -*-
 """
-Module for testing the autodocsumm
+Some module
+-----------
 
-Just a dummy module with some class definitions
+Just a dummy module with some class definition
 """
 
 
-#: to test if the data is included
-test_data = None
+class MyClass(object):
+    """Some class
 
+    With some description"""
 
-def test_func():
-    """Test if function is contained in autosummary"""
-    pass
-
-
-class CallTestClass(object):
-    """A class defining a __call__ method"""
-
-    def __get__(self, instance, owner):
-        return self
-
-    def __set__(self, instance, value):
-        """Actually not required. We just implement it to ensure the python
-        "help" function works well"""
+    def do_something(self):
+        """Do something"""
         pass
 
-    def __call__(self, a, b):
-        """
-        Caller docstring for class attribute
+    #: Any instance attribute
+    some_attr = None
 
-        Parameters
-        ----------
-        a: any
-            dummy parameter
-        b: anything else
-            second dummy parameter"""
-        pass
+    #: Any other instance attribute
+    some_other_attr = None
 
 
-class TestClass(object):
-    """Class test for autosummary"""
-
-    def test_method(self):
-        """Test if the method is included"""
-        pass
-
-    #: to test if the class attribute is included
-    test_attr = None
-
-    class_caller = CallTestClass()
-
-    #: data to be included
-    large_data = 'Should be included'
-
-    #: data to be skipped
-    small_data = 'Should be skipped'
-
-
-#: data to be skipped
-large_data = 'Should also be skipped'
-
-#: data to be included
-small_data = 'Should also be included'
+#: Some module data
+large_data = 'Whatever'
