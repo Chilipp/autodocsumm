@@ -41,6 +41,11 @@ except ImportError:
 if six.PY2:
     from itertools import imap as map
 
+__version__ = '0.0.1.dev0'
+
+__author__ = "Philipp Sommer"
+
+
 sphinx_version = list(map(float, re.findall('\d+', sphinx.__version__)[:3]))
 
 
@@ -51,10 +56,10 @@ class AutosummaryDocumenter(object):
     the necessary methods for the :class:`AutoSummDirective`."""
 
     #: List of functions that may filter the members
-    filter_functions = []
+    filter_funcs = []
 
     #: Grouper functions
-    grouper_functions = []
+    grouper_funcs = []
 
     def __init__(self):
         raise NotImplementedError
@@ -142,10 +147,15 @@ class AutosummaryDocumenter(object):
                                       members_check_module and not isattr))
         documenters = OrderedDict()
         for e in memberdocumenters:
-            section = next(
-                filter(None,
-                       (func(self, *e) for func in self.grouper_functions)),
-                self.member_sections.get(e[0].member_order, 'Miscallaneous'))
+            section = self.member_sections.get(
+                e[0].member_order, 'Miscallaneous')
+            if self.env.app:
+                e[0].parse_name()
+                e[0].import_object()
+                user_section = self.env.app.emit_firstresult(
+                    'autodocsumm-grouper', self.objtype, e[0].object_name,
+                    e[0].object, section, self.options)
+                section = user_section or section
             documenters.setdefault(section, []).append(e)
         return documenters
 
@@ -179,19 +189,6 @@ class AutoSummModuleDocumenter(ModuleDocumenter, AutosummaryDocumenter):
     values correspond to the :attr:`sphinx.ext.autodoc.Documenter.member_order`
     attribute that shall be used for each section."""
 
-    def __init__(self, *args, **kwargs):
-        super(AutoSummModuleDocumenter, self).__init__(*args, **kwargs)
-        if hasattr(self.env, 'config'):
-            self.grouper_functions = self.env.config.autosumm_groupers
-            self.filter_functions = self.env.config.member_filters
-
-    def filter_members(self, *args, **kwargs):
-        ret = super(AutoSummModuleDocumenter, self).filter_members(
-            *args, **kwargs)
-        for func in self.filter_functions:
-            func(self, ret)
-        return ret
-
 
 class AutoSummClassDocumenter(ClassDocumenter, AutosummaryDocumenter):
     """Class documentor suitable for the :class:`AutoSummDirective`
@@ -221,18 +218,59 @@ class AutoSummClassDocumenter(ClassDocumenter, AutosummaryDocumenter):
     values correspond to the :attr:`sphinx.ext.autodoc.Documenter.member_order`
     attribute that shall be used for each section."""
 
-    def __init__(self, *args, **kwargs):
-        super(AutoSummClassDocumenter, self).__init__(*args, **kwargs)
-        if hasattr(self.env, 'config'):
-            self.grouper_functions = self.env.config.autosumm_groupers
-            self.filter_functions = self.env.config.member_filters
 
-    def filter_members(self, *args, **kwargs):
-        ret = super(AutoSummClassDocumenter, self).filter_members(
-            *args, **kwargs)
-        for func in self.filter_functions:
-            func(self, ret)
-        return ret
+class CallableDataDocumenter(DataDocumenter):
+    """:class:`sphinx.ext.autodoc.DataDocumenter` that uses the __call__ attr
+    """
+
+    priority = DataDocumenter.priority + 0.1
+
+    def format_args(self):
+        # for classes, the relevant signature is the __init__ method's
+        callmeth = self.get_attr(self.object, '__call__', None)
+        if callmeth is None:
+            return None
+        try:
+            argspec = getargspec(callmeth)
+        except TypeError:
+            # still not possible: happens e.g. for old-style classes
+            # with __call__ in C
+            return None
+        if argspec[0] and argspec[0][0] in ('cls', 'self'):
+            del argspec[0][0]
+        if sphinx_version < [1, 4]:
+            return formatargspec(*argspec)
+        else:
+            return formatargspec(callmeth, *argspec)
+
+    def get_doc(self, encoding=None, ignore=1):
+        """Reimplemented  to include data from the call method"""
+        content = self.env.config.autodata_content
+        if content not in ('both', 'call') or not self.get_attr(
+                self.get_attr(self.object, '__call__', None), '__doc__'):
+            return super(CallableDataDocumenter, self).get_doc(
+                encoding=encoding, ignore=ignore)
+
+        # for classes, what the "docstring" is can be controlled via a
+        # config value; the default is both docstrings
+        docstrings = []
+        if content != 'call':
+            docstring = self.get_attr(self.object, '__doc__', None)
+            docstrings = [docstring + '\n'] if docstring else []
+        calldocstring = self.get_attr(
+            self.get_attr(self.object, '__call__', None), '__doc__')
+        if docstrings:
+            docstrings[0] += calldocstring
+        else:
+            docstrings.append(calldocstring + '\n')
+
+        doc = []
+        for docstring in docstrings:
+            if not isinstance(docstring, six.text_type):
+                docstring = force_decode(docstring, encoding)
+            doc.append(prepare_docstring(docstring, ignore))
+
+        return doc
 
 
 class CallableAttributeDocumenter(AttributeDocumenter):
@@ -568,11 +606,11 @@ def dont_document_data(config, fullname):
              not any(re.match(p, fullname) for p in config.document_data)))
 
 
-class NoDataDataDocumenter(DataDocumenter):
+class NoDataDataDocumenter(CallableDataDocumenter):
     """DataDocumenter that prevents the displaying of large data"""
 
-    #: slightly higher priority as the one of the DataDocumenter
-    priority = DataDocumenter.priority + 0.1
+    #: slightly higher priority as the one of the CallableDataDocumenter
+    priority = CallableDataDocumenter.priority + 0.1
 
     def __init__(self, *args, **kwargs):
         super(NoDataDataDocumenter, self).__init__(*args, **kwargs)
@@ -602,10 +640,7 @@ def setup(app):
     """setup function for using this module as a sphinx extension"""
     app.setup_extension('sphinx.ext.autosummary')
     app.setup_extension('sphinx.ext.autodoc')
-    try:
-        app.add_config_value('autodata_content', 'both', True)
-    except sphinx.errors.ExtensionError:  # value already registered
-        pass
+
     # make sure to allow inheritance when registering new documenters
     for cls in [AutoSummClassDocumenter, AutoSummModuleDocumenter,
                 CallableAttributeDocumenter, NoDataDataDocumenter,
@@ -617,9 +652,11 @@ def setup(app):
     app.add_directive('automodule', AutoSummDirective)
     app.add_directive('autoclass', AutoSummDirective)
 
-    # config values
-    app.add_config_value('autosumm_groupers', [], True)
-    app.add_config_value('member_filters', [], True)
+    # group event
+    app.add_event('autodocsumm-grouper')
+
+    # config value
+    app.add_config_value('autodata_content', 'class', True)
     app.add_config_value('document_data', [], True)
     app.add_config_value('not_document_data', [re.compile('.*')], True)
     return {'version': sphinx.__display_version__, 'parallel_read_safe': True}
