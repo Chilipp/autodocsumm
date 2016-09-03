@@ -11,11 +11,11 @@ def readme():
 
 
 setup(name='autodocsumm',
-      version='0.0.1.dev0',
+      version='0.1.0',
       description='Extended sphinx autodoc including automatic autosummaries',
       long_description=readme(),
       classifiers=[
-        'Development Status :: 2 - Pre-Alpha',
+        'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         'Topic :: Documentation',
         'License :: OSI Approved :: GNU General Public License v2 (GPLv2)',
