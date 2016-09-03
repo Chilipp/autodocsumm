@@ -35,8 +35,8 @@ setup(name='autodocsumm',
       license="GPLv2",
       packages=find_packages(exclude=['docs', 'tests*', 'examples']),
       install_requires=[
-          'sphinx'
+          'sphinx',
       ],
       setup_requires=pytest_runner,
-      tests_require=['pytest'],
+      tests_require=['pytest', 'sphinx-testing'],
       zip_safe=False)
