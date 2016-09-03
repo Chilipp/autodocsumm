@@ -12,18 +12,16 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import sphinx
 import os
+import os.path as osp
 import re
 import six
-from itertools import product
-import warnings
 import autodocsumm
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-#sys.path.insert(0, os.path.abspath('.'))
+sys.path.insert(0, os.path.abspath(osp.dirname(__file__)))
 
 # -- General configuration ------------------------------------------------
 
@@ -388,6 +386,10 @@ epub_exclude_files = ['search.html']
 intersphinx_mapping = {
     'sphinx': ('http://sphinx-doc.org/', None),
 }
+if six.PY3:
+    intersphinx_mapping['python'] = ('https://docs.python.org/3.4/', None)
+else:
+    intersphinx_mapping['python'] = ('https://docs.python.org/2.7/', None)
 
 
 def example_grouper(app, what, name, obj, section, parent):
