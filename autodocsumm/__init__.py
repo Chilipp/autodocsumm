@@ -154,7 +154,7 @@ class AutosummaryDocumenter(object):
                 e[0].import_object()
                 user_section = self.env.app.emit_firstresult(
                     'autodocsumm-grouper', self.objtype, e[0].object_name,
-                    e[0].object, section, self.options)
+                    e[0].object, section, self.object)
                 section = user_section or section
             documenters.setdefault(section, []).append(e)
         return documenters
@@ -614,7 +614,12 @@ def dont_document_data(config, fullname):
     -------
     bool
         Whether the data of `fullname` should be excluded or not"""
-    return (any(re.match(p, fullname) for p in config.not_document_data) and
+    if config.document_data is True:
+        config.document_data = [re.compile('.*')]
+    if config.not_document_data is True:
+        config.not_document_data = [re.compile('.*')]
+    return ((not config.not_document_data or
+             any(re.match(p, fullname) for p in config.not_document_data)) or
             (not config.document_data or
              not any(re.match(p, fullname) for p in config.document_data)))
 
@@ -670,6 +675,6 @@ def setup(app):
 
     # config value
     app.add_config_value('autodata_content', 'class', True)
-    app.add_config_value('document_data', [], True)
-    app.add_config_value('not_document_data', [re.compile('.*')], True)
+    app.add_config_value('document_data', True, True)
+    app.add_config_value('not_document_data', [], True)
     return {'version': sphinx.__display_version__, 'parallel_read_safe': True}

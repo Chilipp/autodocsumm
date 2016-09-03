@@ -22,7 +22,7 @@ def member_filter(app, what, name, obj, skip, options):
     return None
 
 
-def group_member(app, what, name, obj, section, options):
+def group_member(app, what, name, obj, section, parent):
     if name == 'class_caller':
         return 'DummySection'
 
