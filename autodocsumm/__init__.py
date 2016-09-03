@@ -8,16 +8,8 @@ This option puts a autosummary in the style of the
 The content of this autosummary is automatically determined by the results of
 the automodule (or autoclass) directive.
 
-This extension gives also the possibility to
-choose which data shall be shown. It provides two additional configuration
-values when included as an extension in the ``conf.py`` script:
-
-document_data
-    Default: ``[]``. A list containing regex patterns of the data that shall be
-    shown (it is searched against the fullname, e.g. ``sys.path``)
-not_document_data
-    Default: ``['.*']``. A list containing the regex patterns of the data that
-    shall not be shown (by default, all).
+This extension gives also the possibility to choose which data shall be shown
+and to include the docstring of the ``'__call__'`` attribute.
 """
 import re
 import six
