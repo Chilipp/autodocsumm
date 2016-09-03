@@ -13,7 +13,7 @@ Extending your autodoc API docs with a summary
     * - tests
       - |travis| |requires| |coveralls|
     * - package
-      - |version| |conda| |supported-versions| |supported-implementations|
+      - |version| |supported-versions| |supported-implementations|
 
 .. |docs| image:: http://readthedocs.org/projects/autodocsumm/badge/?version=latest
     :alt: Documentation Status
@@ -34,10 +34,6 @@ Extending your autodoc API docs with a summary
 .. |version| image:: https://img.shields.io/pypi/v/autodocsumm.svg?style=flat
     :alt: PyPI Package latest release
     :target: https://pypi.python.org/pypi/autodocsumm
-
-.. |conda| image:: https://anaconda.org/chilipp/autodocsumm/badges/installer/conda.svg
-    :alt: conda
-    :target: https://conda.anaconda.org/chilipp
 
 .. |supported-versions| image:: https://img.shields.io/pypi/pyversions/autodocsumm.svg?style=flat
     :alt: Supported versions
