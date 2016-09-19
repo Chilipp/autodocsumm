@@ -33,7 +33,7 @@ except ImportError:
 if six.PY2:
     from itertools import imap as map
 
-__version__ = '0.1.1'
+__version__ = '0.1.2'
 
 __author__ = "Philipp Sommer"
 
@@ -610,8 +610,11 @@ def dont_document_data(config, fullname):
         config.document_data = [re.compile('.*')]
     if config.not_document_data is True:
         config.not_document_data = [re.compile('.*')]
-    return ((not config.not_document_data or
+    return (
+            # data should not be documented
+            (config.not_document_data or
              any(re.match(p, fullname) for p in config.not_document_data)) or
+            # or data is not included in what should be documented
             (not config.document_data or
              not any(re.match(p, fullname) for p in config.document_data)))
 
@@ -627,6 +630,7 @@ class NoDataDataDocumenter(CallableDataDocumenter):
         fullname = '.'.join(self.name.rsplit('::', 1))
         if hasattr(self.env, 'config') and dont_document_data(
                 self.env.config, fullname):
+            print('skipping', fullname)
             self.options = Options(self.options)
             self.options.annotation = ' '
 

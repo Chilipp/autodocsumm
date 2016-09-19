@@ -11,7 +11,7 @@ def readme():
 
 
 setup(name='autodocsumm',
-      version='0.1.1',
+      version='0.1.2',
       description='Extended sphinx autodoc including automatic autosummaries',
       long_description=readme(),
       classifiers=[
