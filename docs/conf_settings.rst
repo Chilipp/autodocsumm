@@ -9,7 +9,7 @@ Furthermore it provides the *autosummary* flag for the usage in the
 for their usage.
 
 
-.. event:: autodocsumm-grouper (app, what, name, obj, section, options, parent)
+.. event:: autodocsumm-grouper (app, what, name, obj, section, parent)
 
     Emitted when autodocsumm has to determine the section for a member in the
     table of contents. If the return value is None, the given `section` will be
