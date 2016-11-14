@@ -378,7 +378,8 @@ class AutoSummDirective(AutoDirective, Autosummary):
             # insert table before the documentation of the members
             istart = 2 if 'noindex' not in self.options else 0
             # if we have a title in the module, we look for the section
-            if isinstance(doc_nodes[istart], nodes.section):
+            if (len(doc_nodes) >= istart + 1 and
+                    isinstance(doc_nodes[istart], nodes.section)):
                 others = doc_nodes[istart]
                 istart = 2  # skip the title
             else:
