@@ -9,7 +9,7 @@ Extending your autodoc API docs with a summary
 
 .. start-badges
 
-.. only:: html
+.. only:: html and not epub
 
     .. list-table::
         :stub-columns: 1
