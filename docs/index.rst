@@ -9,45 +9,46 @@ Extending your autodoc API docs with a summary
 
 .. start-badges
 
-.. list-table::
-    :stub-columns: 1
-    :widths: 10 90
+.. only:: html
 
-    * - docs
-      - |docs|
-    * - tests
-      - |travis| |requires| |coveralls|
-    * - package
-      - |version| |supported-versions| |supported-implementations|
+    .. list-table::
+        :stub-columns: 1
+        :widths: 10 90
 
-.. |docs| image:: http://readthedocs.org/projects/autodocsumm/badge/?version=latest
-    :alt: Documentation Status
-    :target: http://autodocsumm.readthedocs.io/en/latest/?badge=latest
+        * - docs
+          - |docs|
+        * - tests
+          - |travis| |requires| |coveralls|
+        * - package
+          - |version| |supported-versions| |supported-implementations|
 
-.. |travis| image:: https://travis-ci.org/Chilipp/autodocsumm.svg?branch=master
-    :alt: Travis
-    :target: https://travis-ci.org/Chilipp/autodocsumm
+    .. |docs| image:: http://readthedocs.org/projects/autodocsumm/badge/?version=latest
+        :alt: Documentation Status
+        :target: http://autodocsumm.readthedocs.io/en/latest/?badge=latest
 
-.. |coveralls| image:: https://coveralls.io/repos/github/Chilipp/autodocsumm/badge.svg?branch=master
-    :alt: Coverage
-    :target: https://coveralls.io/github/Chilipp/autodocsumm?branch=master
+    .. |travis| image:: https://travis-ci.org/Chilipp/autodocsumm.svg?branch=master
+        :alt: Travis
+        :target: https://travis-ci.org/Chilipp/autodocsumm
 
-.. |requires| image:: https://requires.io/github/Chilipp/autodocsumm/requirements.svg?branch=master
-    :alt: Requirements Status
-    :target: https://requires.io/github/Chilipp/autodocsumm/requirements/?branch=master
+    .. |coveralls| image:: https://coveralls.io/repos/github/Chilipp/autodocsumm/badge.svg?branch=master
+        :alt: Coverage
+        :target: https://coveralls.io/github/Chilipp/autodocsumm?branch=master
 
-.. |version| image:: https://img.shields.io/pypi/v/autodocsumm.svg?style=flat
-    :alt: PyPI Package latest release
-    :target: https://pypi.python.org/pypi/autodocsumm
+    .. |requires| image:: https://requires.io/github/Chilipp/autodocsumm/requirements.svg?branch=master
+        :alt: Requirements Status
+        :target: https://requires.io/github/Chilipp/autodocsumm/requirements/?branch=master
 
-.. |supported-versions| image:: https://img.shields.io/pypi/pyversions/autodocsumm.svg?style=flat
-    :alt: Supported versions
-    :target: https://pypi.python.org/pypi/autodocsumm
+    .. |version| image:: https://img.shields.io/pypi/v/autodocsumm.svg?style=flat
+        :alt: PyPI Package latest release
+        :target: https://pypi.python.org/pypi/autodocsumm
 
-.. |supported-implementations| image:: https://img.shields.io/pypi/implementation/autodocsumm.svg?style=flat
-    :alt: Supported implementations
-    :target: https://pypi.python.org/pypi/autodocsumm
+    .. |supported-versions| image:: https://img.shields.io/pypi/pyversions/autodocsumm.svg?style=flat
+        :alt: Supported versions
+        :target: https://pypi.python.org/pypi/autodocsumm
 
+    .. |supported-implementations| image:: https://img.shields.io/pypi/implementation/autodocsumm.svg?style=flat
+        :alt: Supported implementations
+        :target: https://pypi.python.org/pypi/autodocsumm
 
 .. end-badges
 
@@ -112,4 +113,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-
