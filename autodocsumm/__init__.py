@@ -334,7 +334,7 @@ class AutoSummDirective(AutoDirective, Autosummary):
         """Returns the AutosummaryDocumenter subclass that can be used"""
         try:
             return self._autosummary_documenter
-        except:
+        except AttributeError:
             pass
         objtype = self.name[4:]
         doc_class = self._registry[objtype]
@@ -608,16 +608,18 @@ def dont_document_data(config, fullname):
     bool
         Whether the data of `fullname` should be excluded or not"""
     if config.document_data is True:
-        config.document_data = [re.compile('.*')]
+        document_data = [re.compile('.*')]
+    else:
+        document_data = config.document_data
     if config.not_document_data is True:
-        config.not_document_data = [re.compile('.*')]
+        not_document_data = [re.compile('.*')]
+    else:
+        not_document_data = config.not_document_data
     return (
             # data should not be documented
-            (config.not_document_data is True or
-             any(re.match(p, fullname) for p in config.not_document_data)) or
+            (any(re.match(p, fullname) for p in not_document_data)) or
             # or data is not included in what should be documented
-            (not config.document_data or
-             not any(re.match(p, fullname) for p in config.document_data)))
+            (not any(re.match(p, fullname) for p in document_data)))
 
 
 class NoDataDataDocumenter(CallableDataDocumenter):
@@ -660,7 +662,12 @@ def setup(app):
                 CallableAttributeDocumenter, NoDataDataDocumenter,
                 NoDataAttributeDocumenter]:
         if not issubclass(AutoDirective._registry.get(cls.objtype), cls):
-            app.add_autodocumenter(cls)
+            try:
+                # we use add_documenter because this does not add a new
+                # directive
+                ad.add_documenter(cls)
+            except AttributeError:
+                app.add_autodocumenter(cls)
 
     # directives
     app.add_directive('automodule', AutoSummDirective)
