@@ -10,9 +10,15 @@ env:
   - SPHINX_VERSION=1.6.1
   - SPHINX_VERSION=1.6.2
   - SPHINX_VERSION=1.6.3
+  - SPHINX_VERSION=""
 install:
   - pip install coveralls
-  - pip install sphinx==${SPHINX_VERSION}
+  # install sphinx
+  - if [[ $SPHINX_VERSION != "" ]]; then
+        pip install sphinx==${SPHINX_VERSION};
+    else
+        pip install sphinx;
+    fi
   - pip install sphinx-testing
   - python setup.py install
 
