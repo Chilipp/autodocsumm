@@ -20,11 +20,8 @@ def in_between(full, sub, s0, *others):
 
 
 def get_html(app, fname):
-    try:
-        return (app.outdir / fname).read_text()
-    except TypeError:
-        with open(app.outdir + '/' + fname) as f:
-            return f.read()
+    with open(app.outdir + '/' + fname) as f:
+        return f.read()
 
 
 class TestAutosummaryDocumenter(unittest.TestCase):
