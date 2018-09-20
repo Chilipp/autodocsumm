@@ -19,13 +19,21 @@ def in_between(full, sub, s0, *others):
     return full.index(sub) > i0 and full.index(sub) < last
 
 
+def get_html(app, fname):
+    try:
+        return (app.outdir / fname).read_text()
+    except TypeError:
+        with open(app.outdir + '/' + fname) as f:
+            return f.read()
+
+
 class TestAutosummaryDocumenter(unittest.TestCase):
 
     @with_app(buildername='html', srcdir=sphinx_supp,
               copy_srcdir_to_tmpdir=True)
     def test_module(self, app, status, warning):
         app.build()
-        html = (app.outdir / 'test_module.html').read_text()
+        html = get_html(app, 'test_module.html')
         self.assertIn('<span class="pre">TestClass</span>', html)
         self.assertIn('<span class="pre">test_func</span>', html)
         self.assertIn('<span class="pre">test_method</span>', html)
@@ -49,7 +57,7 @@ class TestAutosummaryDocumenter(unittest.TestCase):
               copy_srcdir_to_tmpdir=True)
     def test_module_with_title(self, app, status, warning):
         app.build()
-        html = (app.outdir / 'test_module_title.html').read_text()
+        html = get_html(app, 'test_module_title.html')
         self.assertIn('<span class="pre">TestClass</span>', html)
         self.assertIn('<span class="pre">test_func</span>', html)
         self.assertIn('<span class="pre">test_method</span>', html)
@@ -73,7 +81,7 @@ class TestAutosummaryDocumenter(unittest.TestCase):
               copy_srcdir_to_tmpdir=True)
     def test_class(self, app, status, warning):
         app.build()
-        html = (app.outdir / 'test_class.html').read_text()
+        html = get_html(app, '/test_class.html')
         self.assertIn('<span class="pre">test_method</span>', html)
         self.assertIn('<span class="pre">test_attr</span>', html)
 

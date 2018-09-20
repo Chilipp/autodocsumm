@@ -412,7 +412,10 @@ class AutoSummDirective(AutodocDirective, Autosummary):
         if 'autosummary' not in self.options:
             return doc_nodes
         self.warnings = []
-        self.env = self.state.document.settings.env
+        try:
+            self.env = self.state.document.settings.env
+        except AttributeError:
+            pass  # is set automatically with sphinx >= 1.8.0
         self.result = ViewList()
         documenter = self.autosummary_documenter
         grouped_documenters = documenter.get_grouped_documenters()
