@@ -35,7 +35,7 @@ else:
 if sphinx.__version__ >= '2.0':
     from sphinx.util import force_decode
 else:
-    from sphinx.ext.autodoc.directive import force_decode
+    from sphinx.ext.autodoc import force_decode
     
 try:
     from cyordereddict import OrderedDict
