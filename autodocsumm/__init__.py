@@ -17,7 +17,7 @@ import sphinx
 from sphinx.ext.autodoc import (
     ClassDocumenter, ModuleDocumenter, ALL, PycodeError,
     ModuleAnalyzer, bool_option, AttributeDocumenter, DataDocumenter, Options,
-    force_decode, prepare_docstring)
+    prepare_docstring)
 import sphinx.ext.autodoc as ad
 from sphinx.ext.autosummary import Autosummary, ViewList, mangle_signature
 from docutils import nodes
@@ -32,6 +32,11 @@ else:
         getargspec, formatargspec, AutoDirective as AutodocDirective,
         AutoDirective as AutodocRegistry)
 
+if sphinx.__version__ >= '2.0':
+    from sphinx.util import force_decode
+else:
+    from sphinx.ext.autodoc.directive import force_decode
+    
 try:
     from cyordereddict import OrderedDict
 except ImportError:
