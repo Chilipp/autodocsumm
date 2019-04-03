@@ -423,7 +423,7 @@ class AutoSummDirective(AutodocDirective, Autosummary):
         except AttributeError:
             pass  # is set automatically with sphinx >= 1.8.0
         if sphinx_version < [2, 0]:
-            self.warning = []
+            self.warnings = []
             self.result = ViewList()
         documenter = self.autosummary_documenter
         grouped_documenters = documenter.get_grouped_documenters()
