@@ -17,13 +17,14 @@ import sphinx
 from sphinx.ext.autodoc import (
     ClassDocumenter, ModuleDocumenter, ALL, PycodeError,
     ModuleAnalyzer, bool_option, AttributeDocumenter, DataDocumenter, Options,
-    force_decode, prepare_docstring)
+    prepare_docstring)
 import sphinx.ext.autodoc as ad
-from sphinx.ext.autosummary import Autosummary, ViewList, mangle_signature
+from sphinx.ext.autosummary import Autosummary, mangle_signature
 from docutils import nodes
+from docutils.statemachine import ViewList
 
 if sphinx.__version__ >= '1.7':
-    from sphinx.ext.autodoc import Signature, AutodocRegistry, get_documenters
+    from sphinx.ext.autodoc import Signature, get_documenters
     from sphinx.ext.autodoc.directive import (
         AutodocDirective, AUTODOC_DEFAULT_OPTIONS, DocumenterBridge,
         process_documenter_options)
@@ -31,6 +32,12 @@ else:
     from sphinx.ext.autodoc import (
         getargspec, formatargspec, AutoDirective as AutodocDirective,
         AutoDirective as AutodocRegistry)
+
+if sphinx.__version__ >= '2.0':
+    from sphinx.util import force_decode
+else:
+    from sphinx.ext.autodoc import force_decode
+
 
 try:
     from cyordereddict import OrderedDict
@@ -48,7 +55,7 @@ __version__ = '0.1.7'
 __author__ = "Philipp Sommer"
 
 
-sphinx_version = list(map(float, re.findall('\d+', sphinx.__version__)[:3]))
+sphinx_version = list(map(float, re.findall(r'\d+', sphinx.__version__)[:3]))
 
 
 class AutosummaryDocumenter(object):
@@ -411,12 +418,13 @@ class AutoSummDirective(AutodocDirective, Autosummary):
         doc_nodes = AutodocDirective.run(self)
         if 'autosummary' not in self.options:
             return doc_nodes
-        self.warnings = []
         try:
             self.env = self.state.document.settings.env
         except AttributeError:
             pass  # is set automatically with sphinx >= 1.8.0
-        self.result = ViewList()
+        if sphinx_version < [2, 0]:
+            self.warnings = []
+            self.result = ViewList()
         documenter = self.autosummary_documenter
         grouped_documenters = documenter.get_grouped_documenters()
         summ_nodes = self.autosumm_nodes(documenter, grouped_documenters)
