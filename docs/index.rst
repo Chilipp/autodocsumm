@@ -107,6 +107,40 @@ versions higher than 1.3.
 .. _Sphinx: http://www.sphinx-doc.org/en/stable
 
 
+Quickstart
+==========
+
+In order to activate the autodocsumm extension, you have to list it in your
+``conf.py``:
+
+.. code-block:: python
+    :caption: conf.py
+
+    extensions = [
+        'sphinx.ext.autodoc',
+        ...,
+        'autodocsumm',
+    ]
+
+Once this is done, you can use the ``:autosummary:`` option for autodoc
+directives to generate a table at the top, e.g.:
+
+.. code-block:: rst
+
+    .. automodule:: my.awesome.module
+        :autosummary:
+
+Optionally, you can make autodocsumm active by default for all autodoc
+directives by adding:
+
+.. code-block:: python
+    :caption: conf.py
+
+    autodoc_default_options = {
+        'autosummary': True,
+    }
+
+
 Indices and tables
 ==================
 
