@@ -117,7 +117,7 @@ class AutosummaryDocumenter(object):
             # be cached anyway)
             self.analyzer.find_attr_docs()
         except PycodeError as err:
-            logger.debug('[autodoc] module analyzer failed: %s', err)
+            logger.debug('[autodocsumm] module analyzer failed: %s', err)
             # no source file -- e.g. for builtin and C modules
             self.analyzer = None
             # at least add the module.__file__ as a dependency
@@ -593,9 +593,23 @@ class AutoSummDirective(AutodocDirective, Autosummary):
 
         max_item_chars = 50
         base_documenter = self.autosummary_documenter
-        base_documenter.analyzer = ModuleAnalyzer.for_module(
-                base_documenter.real_modname)
-        attr_docs = base_documenter.analyzer.find_attr_docs()
+        try:
+            base_documenter.analyzer = ModuleAnalyzer.for_module(
+                    base_documenter.real_modname)
+            attr_docs = base_documenter.analyzer.find_attr_docs()
+        except PycodeError as err:
+            logger.debug('[autodocsumm] module analyzer failed: %s', err)
+            # no source file -- e.g. for builtin and C modules
+            base_documenter.analyzer = None
+            attr_docs = {}
+            # at least add the module.__file__ as a dependency
+            if (hasattr(base_documenter.module, '__file__') and
+                    base_documenter.module.__file__):
+                base_documenter.directive.filename_set.add(
+                    base_documenter.module.__file__)
+        else:
+            base_documenter.directive.filename_set.add(
+                base_documenter.analyzer.srcname)
 
         for documenter, check_module in documenters:
             documenter.parse_name()
