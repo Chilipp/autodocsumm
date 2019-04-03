@@ -11,6 +11,7 @@ the automodule (or autoclass) directive.
 This extension gives also the possibility to choose which data shall be shown
 and to include the docstring of the ``'__call__'`` attribute.
 """
+import logging
 import re
 import six
 import sphinx
@@ -56,6 +57,8 @@ __author__ = "Philipp Sommer"
 
 
 sphinx_version = list(map(float, re.findall(r'\d+', sphinx.__version__)[:3]))
+
+logger = logging.getLogger(__name__)
 
 
 class AutosummaryDocumenter(object):
@@ -114,7 +117,7 @@ class AutosummaryDocumenter(object):
             # be cached anyway)
             self.analyzer.find_attr_docs()
         except PycodeError as err:
-            self.env.app.debug('[autodoc] module analyzer failed: %s', err)
+            logger.debug('[autodoc] module analyzer failed: %s', err)
             # no source file -- e.g. for builtin and C modules
             self.analyzer = None
             # at least add the module.__file__ as a dependency
