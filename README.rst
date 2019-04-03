@@ -100,7 +100,6 @@ In order to activate the autodocsumm extension, you have to list it in your
 ``conf.py``:
 
 .. code-block:: python
-    :caption: conf.py
 
     extensions = [
         'sphinx.ext.autodoc',
@@ -117,10 +116,9 @@ directives to generate a table at the top, e.g.:
         :autosummary:
 
 Optionally, you can make autodocsumm active by default for all autodoc
-directives by adding:
+directives by adding in ``conf.py``:
 
 .. code-block:: python
-    :caption: conf.py
 
     autodoc_default_options = {
         'autosummary': True,
