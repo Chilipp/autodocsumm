@@ -46,6 +46,9 @@ class TestClass(object):
         """Test if the method is included"""
         pass
 
+    def test_method_args_kwargs(self, *args, **kwargs):
+        """The stars at args and kwargs should not be escaped"""
+
     #: to test if the class attribute is included
     test_attr = None
 
