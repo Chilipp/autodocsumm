@@ -82,6 +82,12 @@ class TestAutosummaryDocumenter(unittest.TestCase):
         self.assertIn('<span class="pre">test_method</span>', html)
         self.assertIn('<span class="pre">test_attr</span>', html)
 
+        # test escaping of *
+        self.assertNotIn(r'\*args', html)
+        self.assertNotIn(r', \*\*kwargs', html)
+        self.assertIn('*args', html)
+        self.assertIn('**kwargs', html)
+
         # test whether the right objects are included
         self.assertIn('<span class="pre">class_caller</span>', html)
         self.assertIn('Caller docstring for class attribute', html)
