@@ -105,6 +105,13 @@ class TestAutosummaryDocumenter(unittest.TestCase):
             'Attributes', 'Methods'),
             msg='class_caller Attribute not in the right Section!')
 
+    @with_app(buildername='html', srcdir=sphinx_supp,
+              copy_srcdir_to_tmpdir=True)
+    def test_inherited(self, app, status, warning):
+        app.build()
+        html = get_html(app, '/test_inherited.html')
+        self.assertIn('<span class="pre">test_method</span>', html)
+
 
 if __name__ == '__main__':
     unittest.main()

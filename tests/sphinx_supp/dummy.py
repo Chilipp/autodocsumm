@@ -61,6 +61,10 @@ class TestClass(object):
     small_data = 'Should be skipped'
 
 
+class InheritedTestClass(TestClass):
+    """Class test for inherited attributes"""
+
+
 #: data to be skipped
 large_data = 'Should also be skipped'
 
