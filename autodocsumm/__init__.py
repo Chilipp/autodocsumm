@@ -617,6 +617,8 @@ class AutoSummDirective(AutodocDirective, Autosummary):
             documenter.real_modname = documenter.get_real_modname()
             real_name = documenter.fullname
             display_name = documenter.object_name
+            if display_name is None:  # for instance attributes
+                display_name = real_name.split('.')[-1]
             if check_module and not documenter.check_module():
                 continue
 
