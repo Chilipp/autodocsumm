@@ -42,6 +42,10 @@ class Class_CallTest(object):
 class TestClass(object):
     """Class test for autosummary"""
 
+    def __init__(self):
+        #: This is an instance attribute
+        self.instance_attribute = 1
+
     def test_method(self):
         """Test if the method is included"""
         pass

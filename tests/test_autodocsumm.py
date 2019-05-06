@@ -79,6 +79,9 @@ class TestAutosummaryDocumenter(unittest.TestCase):
     def test_class(self, app, status, warning):
         app.build()
         html = get_html(app, '/test_class.html')
+
+        self.assertIn('<span class="pre">instance_attribute</span>', html)
+
         self.assertIn('<span class="pre">test_method</span>', html)
         self.assertIn('<span class="pre">test_attr</span>', html)
 
