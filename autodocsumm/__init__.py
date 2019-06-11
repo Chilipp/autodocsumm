@@ -756,8 +756,12 @@ def setup(app):
                 app.add_autodocumenter(cls)
 
     # directives
-    app.add_directive('automodule', AutoSummDirective)
-    app.add_directive('autoclass', AutoSummDirective)
+    if sphinx.__version__ >= '1.8':
+        app.add_directive('automodule', AutoSummDirective, override=True)
+        app.add_directive('autoclass', AutoSummDirective, override=True)
+    else:
+        app.add_directive('automodule', AutoSummDirective)
+        app.add_directive('autoclass', AutoSummDirective)
 
     # group event
     app.add_event('autodocsumm-grouper')
