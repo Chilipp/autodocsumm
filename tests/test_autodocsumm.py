@@ -108,6 +108,12 @@ class TestAutosummaryDocumenter(unittest.TestCase):
             'Attributes', 'Methods'),
             msg='class_caller Attribute not in the right Section!')
 
+        # check if the InnerClass is in the Classes section (which ends with
+        # the DummySection)
+        self.assertTrue(in_between(
+            html, '<span class="pre">InnerClass</span>', 'Classes',
+            'DummySection'))
+
     @with_app(buildername='html', srcdir=sphinx_supp,
               copy_srcdir_to_tmpdir=True)
     def test_inherited(self, app, status, warning):
