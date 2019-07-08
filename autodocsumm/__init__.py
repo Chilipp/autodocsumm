@@ -100,7 +100,7 @@ class AutosummaryDocumenter(object):
         -----
         If a :class:`sphinx.ext.autodoc.Documenter.member_order` value is not
         in the :attr:`member_sections` dictionary, it will be put into an
-        additional `Miscallaneous` section."""
+        additional `Miscellaneous` section."""
         self.parse_name()
         self.import_object()
         # If there is no real module defined, figure out which to use.
@@ -165,7 +165,7 @@ class AutosummaryDocumenter(object):
         documenters = OrderedDict()
         for e in memberdocumenters:
             section = self.member_sections.get(
-                e[0].member_order, 'Miscallaneous')
+                e[0].member_order, 'Miscellaneous')
             if self.env.app:
                 e[0].parse_name()
                 e[0].import_object()
@@ -226,6 +226,7 @@ class AutoSummClassDocumenter(ClassDocumenter, AutosummaryDocumenter):
     option_spec['autosummary'] = bool_option
 
     member_sections = OrderedDict([
+        (ad.ClassDocumenter.member_order, 'Classes'),
         (ad.MethodDocumenter.member_order, 'Methods'),
         (ad.AttributeDocumenter.member_order, 'Attributes'),
         ])
