@@ -138,10 +138,12 @@ class AutosummaryDocumenter(object):
             self.env.temp_data['autodoc:class'] = self.objpath[0]
 
         # set the members from the autosummary member options
-        options_save = self.options.copy()
-        for option in member_options.intersection(self.options):
-            if getattr(self.options, 'autosummary-' + option):
-                self.options[option] = self.options['autosummary-' + option]
+        options_save = {}
+        for option in member_options.intersection(self.option_spec):
+            autopt = 'autosummary-' + option
+            if getattr(self.options, autopt):
+                options_save[option] = getattr(self.options, option)
+                self.options[option] = getattr(self.options, autopt)
 
         want_all = all_members or self.options.inherited_members or \
             self.options.members is ALL
@@ -187,7 +189,7 @@ class AutosummaryDocumenter(object):
                     e[0].object, section, self.object)
                 section = user_section or section
             documenters.setdefault(section, []).append(e)
-        self.options = options_save
+        self.options.update(options_save)
         return documenters
 
 
@@ -428,7 +430,7 @@ class AutoSummDirective(AutodocDirective, Autosummary):
                 env, reporter,
                 process_documenter_options(doc_class, env.config,
                                            self.options),
-                lineno)
+                lineno, self.state)
         documenter = doc_class(params, self.arguments[0])
         if hasattr(documenter, 'get_grouped_documenters'):
             self._autosummary_documenter = documenter
@@ -447,7 +449,9 @@ class AutoSummDirective(AutodocDirective, Autosummary):
 
     def run(self):
         """Run method for the directive"""
+        options_save = self.options.copy()
         doc_nodes = AutodocDirective.run(self)
+        self.options.update(options_save)
         if 'autosummary' not in self.options:
             return doc_nodes
         try:
