@@ -398,7 +398,7 @@ class AutoSummDirective(AutodocDirective, Autosummary):
 
     if sphinx_version < [1, 7]:
         _default_flags = AutodocDirective._default_flags.union(
-            {'autosummary'} + set(map('autosummary-{}'.format, member_options))
+            {'autosummary'} | set(map('autosummary-{}'.format, member_options))
             )
     else:
         AUTODOC_DEFAULT_OPTIONS.append('autosummary')
