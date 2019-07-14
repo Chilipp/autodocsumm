@@ -53,6 +53,9 @@ class TestClass(object):
     def test_method_args_kwargs(self, *args, **kwargs):
         """The stars at args and kwargs should not be escaped"""
 
+    class InnerClass(object):
+        """A test for an inner class"""
+
     #: to test if the class attribute is included
     test_attr = None
 
