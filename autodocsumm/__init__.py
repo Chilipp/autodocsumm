@@ -60,6 +60,13 @@ sphinx_version = list(map(float, re.findall(r'\d+', sphinx.__version__)[:3]))
 
 logger = logging.getLogger(__name__)
 
+#: Options of the :class:`sphinx.ext.autodoc.ModuleDocumenter` that have an
+#: effect on the selection of members for the documentation
+member_options = {
+    'members', 'undoc-members', 'inherited-members', 'exlude-members',
+    'private-members', 'special-members', 'imported-members',
+    'ignore-module-all'}
+
 
 class AutosummaryDocumenter(object):
     """Abstract class for for extending Documenter methods
@@ -130,6 +137,12 @@ class AutosummaryDocumenter(object):
         if self.objpath:
             self.env.temp_data['autodoc:class'] = self.objpath[0]
 
+        # set the members from the autosummary member options
+        options_save = self.options.copy()
+        for option in member_options.intersection(self.options):
+            if getattr(self.options, 'autosummary-' + option):
+                self.options[option] = self.options['autosummary-' + option]
+
         want_all = all_members or self.options.inherited_members or \
             self.options.members is ALL
         # find out which members are documentable
@@ -174,6 +187,7 @@ class AutosummaryDocumenter(object):
                     e[0].object, section, self.object)
                 section = user_section or section
             documenters.setdefault(section, []).append(e)
+        self.options = options_save
         return documenters
 
 
@@ -191,8 +205,13 @@ class AutoSummModuleDocumenter(ModuleDocumenter, AutosummaryDocumenter):
 
     #: original option_spec from :class:`sphinx.ext.autodoc.ModuleDocumenter`
     #: but with additional autosummary boolean option
-    option_spec = ModuleDocumenter.option_spec
+    option_spec = ModuleDocumenter.option_spec.copy()
     option_spec['autosummary'] = bool_option
+
+    #: Add options for members for the autosummary
+    for _option in member_options.intersection(option_spec):
+        option_spec['autosummary-' + _option] = option_spec[_option]
+    del _option
 
     member_sections = OrderedDict([
         (ad.ClassDocumenter.member_order, 'Classes'),
@@ -222,8 +241,13 @@ class AutoSummClassDocumenter(ClassDocumenter, AutosummaryDocumenter):
 
     #: original option_spec from :class:`sphinx.ext.autodoc.ClassDocumenter`
     #: but with additional autosummary boolean option
-    option_spec = ClassDocumenter.option_spec
+    option_spec = ClassDocumenter.option_spec.copy()
     option_spec['autosummary'] = bool_option
+
+    #: Add options for members for the autosummary
+    for _option in member_options.intersection(option_spec):
+        option_spec['autosummary-' + _option] = option_spec[_option]
+    del _option
 
     member_sections = OrderedDict([
         (ad.ClassDocumenter.member_order, 'Classes'),
@@ -373,9 +397,13 @@ class AutoSummDirective(AutodocDirective, Autosummary):
     the specified module at the beginning of the module documentation."""
 
     if sphinx_version < [1, 7]:
-        _default_flags = AutodocDirective._default_flags.union({'autosummary'})
+        _default_flags = AutodocDirective._default_flags.union(
+            {'autosummary'} + set(map('autosummary-{}'.format, member_options))
+            )
     else:
         AUTODOC_DEFAULT_OPTIONS.append('autosummary')
+        AUTODOC_DEFAULT_OPTIONS.extend(
+            map('autosummary-{}'.format, member_options))
 
     @property
     def autosummary_documenter(self):
