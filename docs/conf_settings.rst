@@ -25,9 +25,9 @@ via
 
     autodoc_default_options = {'autosummary': True}
 
-See also the :ref:`examples` section it's usage.
+See also the usage in the :ref:`examples` section.
 
-The other additional flags let you control what should be in the autosummary
+The other additional flags lets you control what should be in the autosummary
 table: these are
 
 - ``autosummary-private-members``
