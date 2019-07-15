@@ -47,7 +47,7 @@ to the :event:`autodocsumm-grouper` event. For example, if you include::
 in your *conf.py*, you get :ref:`this <demo_grouper>`.
 
 Note that you can also include the *autosummary* flag in the
-:confval:`autodoc_default_flags` configuration value
+:confval:`autodoc_default_options` configuration value
 
 
 Including the ``__call__`` method

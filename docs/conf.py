@@ -60,7 +60,7 @@ source_suffix = '.rst'
 # The master toctree document.
 master_doc = 'index'
 
-autodoc_default_flags = ['show_inheritance', 'autosummary']
+autodoc_default_options = {'show_inheritance': True, 'autosummary': True}
 autoclass_content = 'both'
 autodata_content = 'call'
 
@@ -385,10 +385,10 @@ epub_exclude_files = ['search.html']
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {
-    'sphinx': ('http://sphinx-doc.org/', None),
+    'sphinx': ('http://www.sphinx-doc.org/en/master/', None),
 }
 if six.PY3:
-    intersphinx_mapping['python'] = ('https://docs.python.org/3.4/', None)
+    intersphinx_mapping['python'] = ('https://docs.python.org/3.7/', None)
 else:
     intersphinx_mapping['python'] = ('https://docs.python.org/2.7/', None)
 
