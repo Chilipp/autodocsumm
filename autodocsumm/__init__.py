@@ -34,7 +34,9 @@ else:
         getargspec, formatargspec, AutoDirective as AutodocDirective,
         AutoDirective as AutodocRegistry)
 
-if sphinx.__version__ >= '2.0':
+sphinx_version = list(map(float, re.findall(r'\d+', sphinx.__version__)[:3]))
+
+if sphinx_version >= [2, 0]:
     from sphinx.util import force_decode
 else:
     from sphinx.ext.autodoc import force_decode
@@ -54,9 +56,6 @@ if six.PY2:
 __version__ = '0.1.10'
 
 __author__ = "Philipp Sommer"
-
-
-sphinx_version = list(map(float, re.findall(r'\d+', sphinx.__version__)[:3]))
 
 logger = logging.getLogger(__name__)
 
@@ -426,11 +425,12 @@ class AutoSummDirective(AutodocDirective, Autosummary):
             except AttributeError:
                 lineno = None
             doc_class = get_documenters(self.env.app)[objtype]
+            args = (self.state, ) if sphinx_version >= [2, 1] else ()
             params = DocumenterBridge(
                 env, reporter,
                 process_documenter_options(doc_class, env.config,
                                            self.options),
-                lineno, self.state)
+                lineno, *args)
         documenter = doc_class(params, self.arguments[0])
         if hasattr(documenter, 'get_grouped_documenters'):
             self._autosummary_documenter = documenter
@@ -789,7 +789,7 @@ def setup(app):
                 app.add_autodocumenter(cls)
 
     # directives
-    if sphinx.__version__ >= '1.8':
+    if sphinx_version >= [1, 8]:
         app.add_directive('automodule', AutoSummDirective, override=True)
         app.add_directive('autoclass', AutoSummDirective, override=True)
     else:
