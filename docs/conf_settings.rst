@@ -40,7 +40,7 @@ table: these are
 - ``autosummary-members``
 
 They are essentially the same as the options for :mod:`~sphinx.ext.autodoc`
-(i.e. ``private-members`` or ``members``, but they only affect the
+(i.e. ``private-members`` or ``members``), but they only affect the
 autosummary table (see the example in :ref:`summary-table-example`).
 
 
