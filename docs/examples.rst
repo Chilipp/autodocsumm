@@ -47,7 +47,7 @@ to the :event:`autodocsumm-grouper` event. For example, if you include::
 in your *conf.py*, you get :ref:`this <demo_grouper>`.
 
 Note that you can also include the *autosummary* flag in the
-:confval:`autodoc_default_flags` configuration value
+:confval:`autodoc_default_options` configuration value
 
 
 Including the ``__call__`` method
@@ -90,3 +90,27 @@ your *conf.py*. Then you get
 
 .. autodata:: no_data_demo.d
     :noindex:
+
+.. _summary-table-example:
+
+Generating a summary table without the full documentation
+---------------------------------------------------------
+Using one of the ``autosummary-...`` options (e.g. ``autosummary-members``,
+see :ref:`autodoc-flags`) let's you create a summary table that points to the
+documentation in another point of the documentation. You should, however make
+sure to add the ``noindex`` flag and to add a ``no-members`` flag. For our
+:mod:`autodocsumm` module this for example then looks like::
+
+    .. automodule:: autodocsumm
+        :noindex:
+        :no-members:
+        :autosummary:
+        :autosummary-members:
+
+which gives us
+
+.. automodule:: autodocsumm
+    :noindex:
+    :no-members:
+    :autosummary:
+    :autosummary-members:

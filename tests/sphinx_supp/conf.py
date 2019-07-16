@@ -1,12 +1,20 @@
 # -*- coding: utf-8 -*-
 import sys
+import sphinx
 sys.path.insert(0, '.')
 
 master_doc = 'index'
 
 extensions = ['autodocsumm']
 
-autodoc_default_flags = ['show_inheritance', 'autosummary', 'members']
+if tuple(map(int, sphinx.__version__.split('.')[:2])) < (2, 1):
+    autodoc_default_flags = ['show_inheritance', 'autosummary', 'members']
+else:
+    autodoc_default_options = {
+        'show_inheritance': True,
+        'autosummary': True,
+        'members': True
+        }
 
 not_document_data = [
     'dummy.large_data', 'dummy.TestClass.small_data',

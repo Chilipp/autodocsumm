@@ -52,6 +52,20 @@ class TestAutosummaryDocumenter(unittest.TestCase):
 
     @with_app(buildername='html', srcdir=sphinx_supp,
               copy_srcdir_to_tmpdir=True)
+    def test_module_summary_only(self, app, status, warning):
+        app.build()
+        html = get_html(app, 'test_module_summary_only.html')
+        self.assertIn('<span class="pre">TestClass</span>', html)
+        self.assertIn('<span class="pre">test_func</span>', html)
+
+        # test whether the data is shown correctly
+        self.assertIn('<span class="pre">large_data</span>', html)
+        self.assertIn('<span class="pre">small_data</span>', html)
+
+        self.assertNotIn('<dt id="dummy.Class_CallTest">', html)
+
+    @with_app(buildername='html', srcdir=sphinx_supp,
+              copy_srcdir_to_tmpdir=True)
     def test_module_with_title(self, app, status, warning):
         app.build()
         html = get_html(app, 'test_module_title.html')
@@ -113,6 +127,26 @@ class TestAutosummaryDocumenter(unittest.TestCase):
         self.assertTrue(in_between(
             html, '<span class="pre">InnerClass</span>', 'Classes',
             'DummySection'))
+
+    @with_app(buildername='html', srcdir=sphinx_supp,
+              copy_srcdir_to_tmpdir=True)
+    def test_class_summary_only(self, app, status, warning):
+        app.build()
+        html = get_html(app, '/test_class_summary_only.html')
+
+        self.assertIn('<span class="pre">instance_attribute</span>', html)
+
+        self.assertIn('<span class="pre">test_method</span>', html)
+        self.assertIn('<span class="pre">test_attr</span>', html)
+
+        # test whether the right objects are included
+        self.assertIn('<span class="pre">class_caller</span>', html)
+
+        # test whether the data is shown correctly
+        self.assertIn('<span class="pre">large_data</span>', html)
+        self.assertIn('<span class="pre">small_data</span>', html)
+
+        self.assertNotIn('<dt id="dummy.TestClass.small_data">', html)
 
     @with_app(buildername='html', srcdir=sphinx_supp,
               copy_srcdir_to_tmpdir=True)

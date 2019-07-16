@@ -1,13 +1,53 @@
-.. confvals:
+.. highlight:: rest
+
+Configuration of the sphinx extension
+=====================================
+
+The module provides 3 additional configuration values, one event and new
+flags for the autodoc directives :rst:dir:`autoclass` and :rst:dir:`automodule`.
+
+.. _autodoc-flags:
+
+Additional flags for autodoc directives
+---------------------------------------
+The most important new flag for the :rst:dir:`autoclass` and
+:rst:dir:`automodule` directives is the ``autosummary`` flag. If you want to
+have an automatically generated summary to your class or module, you have to
+add this flag, e.g. via::
+
+    .. autodoc:: MyClass
+        :autosummary:
+
+or in the :confval:`autodoc_default_options` configuration value of sphinx
+via
+
+.. code-block:: python
+
+    autodoc_default_options = {'autosummary': True}
+
+See also the usage in the :ref:`examples` section.
+
+The other additional flags lets you control what should be in the autosummary
+table: these are
+
+- ``autosummary-private-members``
+- ``autosummary-undoc-members``
+- ``autosummary-inherited-members``
+- ``autosummary-special-members``
+- ``autosummary-exlude-members``
+- ``autosummary-imported-members``
+- ``autosummary-ignore-module-all``
+- ``autosummary-members``
+
+They are essentially the same as the options for :mod:`~sphinx.ext.autodoc`
+(i.e. ``private-members`` or ``members``, but they only affect the
+autosummary table (see the example in :ref:`summary-table-example`).
+
+
+.. _confvals:
 
 Configuration values and events
-===============================
-
-The module provides 3 additional configuration values and one event.
-Furthermore it provides the *autosummary* flag for the usage in the
-*automodule* and *autoclass* directive. See also the :ref:`examples` section
-for their usage.
-
+-------------------------------
 
 .. event:: autodocsumm-grouper (app, what, name, obj, section, parent)
 
