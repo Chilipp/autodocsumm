@@ -787,12 +787,12 @@ def setup(app):
                 CallableAttributeDocumenter, NoDataDataDocumenter,
                 NoDataAttributeDocumenter]:
         if not issubclass(registry.get(cls.objtype), cls):
-            try:
-                # we use add_documenter because this does not add a new
-                # directive
-                app.add_documenter(cls)
-            except AttributeError:
+            if sphinx_version >= [2, 2]:
+                app.add_autodocumenter(cls, override=True)
+            elif sphinx_version >= [0, 6]:
                 app.add_autodocumenter(cls)
+            else:
+                app.add_documenter(cls)
 
     # directives
     if sphinx_version >= [1, 8]:
