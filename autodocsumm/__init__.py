@@ -62,7 +62,7 @@ logger = logging.getLogger(__name__)
 #: Options of the :class:`sphinx.ext.autodoc.ModuleDocumenter` that have an
 #: effect on the selection of members for the documentation
 member_options = {
-    'members', 'undoc-members', 'inherited-members', 'exlude-members',
+    'members', 'undoc-members', 'inherited-members', 'exclude-members',
     'private-members', 'special-members', 'imported-members',
     'ignore-module-all'}
 
@@ -208,6 +208,7 @@ class AutoSummModuleDocumenter(ModuleDocumenter, AutosummaryDocumenter):
     #: but with additional autosummary boolean option
     option_spec = ModuleDocumenter.option_spec.copy()
     option_spec['autosummary'] = bool_option
+    option_spec['autosummary-no-nesting'] = bool_option
 
     #: Add options for members for the autosummary
     for _option in member_options.intersection(option_spec):
@@ -244,6 +245,7 @@ class AutoSummClassDocumenter(ClassDocumenter, AutosummaryDocumenter):
     #: but with additional autosummary boolean option
     option_spec = ClassDocumenter.option_spec.copy()
     option_spec['autosummary'] = bool_option
+    option_spec['autosummary-no-nesting'] = bool_option
 
     #: Add options for members for the autosummary
     for _option in member_options.intersection(option_spec):
@@ -399,10 +401,10 @@ class AutoSummDirective(AutodocDirective, Autosummary):
 
     if sphinx_version < [1, 7]:
         _default_flags = AutodocDirective._default_flags.union(
-            {'autosummary'} | set(map('autosummary-{}'.format, member_options))
+            {'autosummary', 'autosummary-no-nesting'} | set(map('autosummary-{}'.format, member_options))
             )
     else:
-        AUTODOC_DEFAULT_OPTIONS.append('autosummary')
+        AUTODOC_DEFAULT_OPTIONS.extend(['autosummary', 'autosummary-no-nesting'])
         AUTODOC_DEFAULT_OPTIONS.extend(
             map('autosummary-{}'.format, member_options))
 
@@ -463,7 +465,8 @@ class AutoSummDirective(AutodocDirective, Autosummary):
             self.result = ViewList()
         documenter = self.autosummary_documenter
         grouped_documenters = documenter.get_grouped_documenters()
-        summ_nodes = self.autosumm_nodes(documenter, grouped_documenters)
+        nested = 'autosummary-no-nesting' not in self.options
+        summ_nodes = self.autosumm_nodes(documenter, grouped_documenters, nested)
 
         dn = summ_nodes.pop(documenter.fullname)
         if self.name == 'automodule':
@@ -559,7 +562,7 @@ class AutoSummDirective(AutodocDirective, Autosummary):
             inject_summary(node)
         return doc_nodes
 
-    def autosumm_nodes(self, documenter, grouped_documenters):
+    def autosumm_nodes(self, documenter, grouped_documenters, nested):
         """Create the autosummary nodes based on the documenter content
 
         Parameters
@@ -570,6 +573,8 @@ class AutoSummDirective(AutodocDirective, Autosummary):
         grouped_documenters: dict
             The dictionary as it is returned from the
             :meth:`AutosummaryDocumenter.get_grouped_documenters` method
+        nested: bool
+            If true, autosummary tables will also be created for members.
 
         Returns
         -------
@@ -596,13 +601,14 @@ class AutoSummDirective(AutodocDirective, Autosummary):
                 ViewList(['**%s**' % section]), 0, node)
             this_nodes += node
             this_nodes += self.get_table(items)
-            for mdocumenter, check_module in documenters:
-                if (mdocumenter.objtype == 'class' and
-                        not (check_module and not mdocumenter.check_module())):
-                    if hasattr(mdocumenter, 'get_grouped_documenters'):
-                        summ_nodes.update(self.autosumm_nodes(
-                            mdocumenter, mdocumenter.get_grouped_documenters())
-                            )
+            if nested:
+                for mdocumenter, check_module in documenters:
+                    if (mdocumenter.objtype == 'class' and
+                            not (check_module and not mdocumenter.check_module())):
+                        if hasattr(mdocumenter, 'get_grouped_documenters'):
+                            summ_nodes.update(self.autosumm_nodes(
+                                mdocumenter, mdocumenter.get_grouped_documenters(), nested)
+                                )
         summ_nodes[documenter.fullname] = this_nodes
         return summ_nodes
 

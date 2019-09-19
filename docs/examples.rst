@@ -114,3 +114,26 @@ which gives us
     :no-members:
     :autosummary:
     :autosummary-members:
+
+.. _no-nesting-example:
+
+Generating a summary table for the module without nesting
+---------------------------------------------------------
+
+Using the ``autosummary-no-nesting`` option, you can generate the autosummary
+table for a module without generating autosummary tables for members within
+that module. This is useful when you only want to use the autosummary table as
+a table of contents for a given page. For the :doc:`demo module <demo_module>`,
+ here's an example:
+
+    .. automodule:: dummy
+        :autosummary:
+        :autosummary-no-nesting:
+
+which gives us
+
+.. automodule:: dummy
+    :noindex:
+    :autosummary:
+    :autosummary-no-nesting:
+
