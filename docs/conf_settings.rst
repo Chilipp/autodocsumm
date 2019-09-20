@@ -38,10 +38,15 @@ table: these are
 - ``autosummary-imported-members``
 - ``autosummary-ignore-module-all``
 - ``autosummary-members``
+- ``autosummary-no-nesting``
 
 They are essentially the same as the options for :mod:`~sphinx.ext.autodoc`
 (i.e. ``private-members`` or ``members``), but they only affect the
 autosummary table (see the example in :ref:`summary-table-example`).
+
+The new additional flag ``autosummary-no-nesting`` only generates
+autosummary tables for a module, but not for members within. See
+:ref:`no-nesting-example`.
 
 
 .. _confvals:

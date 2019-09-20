@@ -52,6 +52,26 @@ class TestAutosummaryDocumenter(unittest.TestCase):
 
     @with_app(buildername='html', srcdir=sphinx_supp,
               copy_srcdir_to_tmpdir=True)
+    def test_module_no_nesting(self, app, status, warning):
+        app.build()
+        html = get_html(app, 'test_module_no_nesting.html')
+
+        self.assertIn('<span class="pre">TestClass</span>', html)
+        self.assertIn('<span class="pre">test_func</span>', html)
+
+        # test whether the data is shown correctly
+        self.assertIn('<span class="pre">large_data</span>', html)
+        self.assertIn('<span class="pre">small_data</span>', html)
+
+        # test that elements of TestClass are not autosummarized, since nesting is disabled.
+        self.assertNotIn('<span class="pre">test_method</span>', html)
+        self.assertNotIn('<span class="pre">test_attr</span>', html)
+
+        # test the members are still displayed
+        self.assertIn('<dt id="dummy.Class_CallTest">', html)
+
+    @with_app(buildername='html', srcdir=sphinx_supp,
+              copy_srcdir_to_tmpdir=True)
     def test_module_summary_only(self, app, status, warning):
         app.build()
         html = get_html(app, 'test_module_summary_only.html')

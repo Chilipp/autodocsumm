@@ -9,3 +9,4 @@ Example documentation
     test_class_summary_only
     test_inherited
     test_module_title
+    test_module_no_nesting
