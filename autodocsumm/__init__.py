@@ -60,7 +60,7 @@ except ImportError:
 if six.PY2:
     from itertools import imap as map
 
-__version__ = '0.1.11'
+__version__ = '0.1.12'
 
 __author__ = "Philipp Sommer"
 
