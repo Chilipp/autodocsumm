@@ -24,11 +24,18 @@ from sphinx.ext.autosummary import Autosummary, mangle_signature
 from docutils import nodes
 from docutils.statemachine import ViewList
 
+signature = Signature = None
+
 if sphinx.__version__ >= '1.7':
-    from sphinx.ext.autodoc import Signature, get_documenters
+    from sphinx.ext.autodoc import get_documenters
     from sphinx.ext.autodoc.directive import (
         AutodocDirective, AUTODOC_DEFAULT_OPTIONS, DocumenterBridge,
         process_documenter_options)
+    try:
+        from sphinx.util.inspect import signature, stringify_signature
+    except ImportError:
+        from sphinx.ext.autodoc import Signature
+
 else:
     from sphinx.ext.autodoc import (
         getargspec, formatargspec, AutoDirective as AutodocDirective,
@@ -65,6 +72,35 @@ member_options = {
     'members', 'undoc-members', 'inherited-members', 'exclude-members',
     'private-members', 'special-members', 'imported-members',
     'ignore-module-all'}
+
+
+if signature is not None:  # sphinx >= 2.4.0
+    def process_signature(obj):
+        sig = signature(obj)
+        return stringify_signature(sig)
+elif Signature is not None:  # sphinx >= 1.7
+    def process_signature(obj):
+        try:
+            args = Signature(obj).format_args()
+        except TypeError:
+            return None
+        else:
+            args = args.replace('\\', '\\\\')
+            return args
+else:
+    def process_signature(obj):
+        try:
+            argspec = getargspec(obj)
+        except TypeError:
+            # still not possible: happens e.g. for old-style classes
+            # with __call__ in C
+            return None
+        if argspec[0] and argspec[0][0] in ('cls', 'self'):
+            del argspec[0][0]
+        if sphinx_version < [1, 4]:
+            return formatargspec(*argspec)
+        else:
+            return formatargspec(obj, *argspec)
 
 
 class AutosummaryDocumenter(object):
@@ -276,26 +312,9 @@ class CallableDataDocumenter(DataDocumenter):
         if callmeth is None:
             return None
         if sphinx_version < [1, 7]:
-            try:
-                argspec = getargspec(callmeth)
-            except TypeError:
-                # still not possible: happens e.g. for old-style classes
-                # with __call__ in C
-                return None
-            if argspec[0] and argspec[0][0] in ('cls', 'self'):
-                del argspec[0][0]
-            if sphinx_version < [1, 4]:
-                return formatargspec(*argspec)
-            else:
-                return formatargspec(callmeth, *argspec)
+            pass
         else:
-            try:
-                args = Signature(callmeth).format_args()
-            except TypeError:
-                return None
-            else:
-                args = args.replace('\\', '\\\\')
-                return args
+            return process_signature(callmeth)
 
     def get_doc(self, encoding=None, ignore=1):
         """Reimplemented  to include data from the call method"""
@@ -339,27 +358,7 @@ class CallableAttributeDocumenter(AttributeDocumenter):
         callmeth = self.get_attr(self.object, '__call__', None)
         if callmeth is None:
             return None
-        if sphinx_version < [1, 7]:
-            try:
-                argspec = getargspec(callmeth)
-            except TypeError:
-                # still not possible: happens e.g. for old-style classes
-                # with __call__ in C
-                return None
-            if argspec[0] and argspec[0][0] in ('cls', 'self'):
-                del argspec[0][0]
-            if sphinx_version < [1, 4]:
-                return formatargspec(*argspec)
-            else:
-                return formatargspec(callmeth, *argspec)
-        else:
-            try:
-                args = Signature(callmeth).format_args()
-            except TypeError:
-                return None
-            else:
-                args = args.replace('\\', '\\\\')
-                return args
+        return process_signature(callmeth)
 
     def get_doc(self, encoding=None, ignore=1):
         """Reimplemented  to include data from the call method"""
