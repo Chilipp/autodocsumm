@@ -495,7 +495,10 @@ class AutoSummDirective(AutodocDirective, Autosummary):
                 for node in dn[::-1]:
                     others.insert(i, node)
                 dn = []
-        return self.warnings + dn + doc_nodes
+        if sphinx_version < [2, 0]:
+            return self.warnings + dn + doc_nodes
+        else:
+            return dn + doc_nodes
 
     def _insert_after_paragraphs(self, node, insertion):
         """Inserts the given `insertion` node after the paragraphs in `node`

@@ -2,6 +2,10 @@ import sys
 import os.path as osp
 import unittest
 from sphinx_testing import with_app
+import sphinx
+
+
+from autodocsumm import sphinx_version
 
 
 sphinx_supp = osp.abspath(osp.join(osp.dirname(__file__), 'sphinx_supp'))
@@ -174,6 +178,18 @@ class TestAutosummaryDocumenter(unittest.TestCase):
         app.build()
         html = get_html(app, '/test_inherited.html')
         self.assertIn('<span class="pre">test_method</span>', html)
+
+    @with_app(buildername='html', srcdir=sphinx_supp,
+              copy_srcdir_to_tmpdir=True)
+    @unittest.skipIf(list(sys.version_info)[:2] <= [2, 7],
+                     "not implemented for python 2.7")
+    @unittest.skipIf(sphinx_version < [2, 0],
+                     "not a problem for sphinx 2.7")
+    @unittest.expectedFailure
+    def test_warnings_depreciation(self, app, status, warning):
+        with self.assertWarnsRegex(sphinx.deprecation.RemovedInSphinx40Warning,
+                                   r'(?s).*Autosummary.warnings'):
+            app.build()
 
 
 if __name__ == '__main__':
