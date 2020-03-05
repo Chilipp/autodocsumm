@@ -11,7 +11,7 @@ def readme():
 
 
 setup(name='autodocsumm',
-      version='0.1.12',
+      version='0.1.13',
       description='Extended sphinx autodoc including automatic autosummaries',
       long_description=readme(),
       long_description_content_type='text/x-rst',
@@ -31,8 +31,8 @@ setup(name='autodocsumm',
       ],
       keywords='sphinx autodoc autosummary content table',
       url='https://github.com/Chilipp/autodocsumm',
-      author='Philipp Sommer',
-      author_email='philipp.sommer@unil.ch',
+      author='Philipp S. Sommer',
+      author_email='philipp.sommer@hzg.de',
       license="GPLv2",
       packages=find_packages(exclude=['docs', 'tests*', 'examples']),
       install_requires=[
