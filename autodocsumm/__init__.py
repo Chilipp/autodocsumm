@@ -20,33 +20,21 @@ from sphinx.ext.autodoc import (
     ModuleAnalyzer, bool_option, AttributeDocumenter, DataDocumenter, Options,
     prepare_docstring)
 import sphinx.ext.autodoc as ad
-from sphinx.ext.autosummary import Autosummary, mangle_signature
-from docutils import nodes
-from docutils.statemachine import ViewList
 
 signature = Signature = None
 
-if sphinx.__version__ >= '1.7':
-    from sphinx.ext.autodoc import get_documenters
-    from sphinx.ext.autodoc.directive import (
-        AutodocDirective, AUTODOC_DEFAULT_OPTIONS, DocumenterBridge,
-        process_documenter_options)
-    try:
-        from sphinx.util.inspect import signature, stringify_signature
-    except ImportError:
-        from sphinx.ext.autodoc import Signature
+from sphinx.ext.autodoc.directive import AUTODOC_DEFAULT_OPTIONS
 
-else:
-    from sphinx.ext.autodoc import (
-        getargspec, formatargspec, AutoDirective as AutodocDirective,
-        AutoDirective as AutodocRegistry)
+from sphinx.ext.autodoc import get_documenters
+
+try:
+    from sphinx.util.inspect import signature, stringify_signature
+except ImportError:
+    from sphinx.ext.autodoc import Signature
 
 sphinx_version = list(map(float, re.findall(r'\d+', sphinx.__version__)[:3]))
 
-if sphinx_version >= [2, 0]:
-    from sphinx.util import force_decode
-else:
-    from sphinx.ext.autodoc import force_decode
+from sphinx.util import force_decode
 
 
 try:
@@ -60,7 +48,7 @@ except ImportError:
 if six.PY2:
     from itertools import imap as map
 
-__version__ = '0.1.13'
+__version__ = '0.1.14'
 
 __author__ = "Philipp S. Sommer"
 
@@ -87,20 +75,6 @@ elif Signature is not None:  # sphinx >= 1.7
         else:
             args = args.replace('\\', '\\\\')
             return args
-else:
-    def process_signature(obj):
-        try:
-            argspec = getargspec(obj)
-        except TypeError:
-            # still not possible: happens e.g. for old-style classes
-            # with __call__ in C
-            return None
-        if argspec[0] and argspec[0][0] in ('cls', 'self'):
-            del argspec[0][0]
-        if sphinx_version < [1, 4]:
-            return formatargspec(*argspec)
-        else:
-            return formatargspec(obj, *argspec)
 
 
 class AutosummaryDocumenter(object):
@@ -192,10 +166,8 @@ class AutosummaryDocumenter(object):
 
         # document non-skipped members
         memberdocumenters = []
-        if sphinx_version < [1, 7]:
-            registry = AutodocRegistry._registry
-        else:
-            registry = get_documenters(self.env.app)
+        registry = get_documenters(self.env.app)
+
         for (mname, member, isattr) in self.filter_members(members, want_all):
             classes = [cls for cls in six.itervalues(registry)
                        if cls.can_document_member(member, mname, isattr, self)]
@@ -228,8 +200,7 @@ class AutosummaryDocumenter(object):
         return documenters
 
     def add_autosummary(self):
-        """Add the autosammary table of this documenter"""
-
+        """Add the autosammary table of this documenter."""
         if self.options.autosummary:
 
             grouped_documenters = self.get_grouped_documenters()
@@ -347,10 +318,7 @@ class CallableDataDocumenter(DataDocumenter):
         callmeth = self.get_attr(self.object, '__call__', None)
         if callmeth is None:
             return None
-        if sphinx_version < [1, 7]:
-            pass
-        else:
-            return process_signature(callmeth)
+        return process_signature(callmeth)
 
     def get_doc(self, encoding=None, ignore=1):
         """Reimplemented  to include data from the call method"""
@@ -499,20 +467,12 @@ def setup(app):
          if option not in AUTODOC_DEFAULT_OPTIONS])
 
     # make sure to allow inheritance when registering new documenters
-    if sphinx_version < [1, 7]:
-        registry = AutodocRegistry._registry
-    else:
-        registry = get_documenters(app)
+    registry = get_documenters(app)
     for cls in [AutoSummClassDocumenter, AutoSummModuleDocumenter,
                 CallableAttributeDocumenter, NoDataDataDocumenter,
                 NoDataAttributeDocumenter]:
         if not issubclass(registry.get(cls.objtype), cls):
-            if sphinx_version >= [2, 2]:
-                app.add_autodocumenter(cls, override=True)
-            elif sphinx_version >= [0, 6]:
-                app.add_autodocumenter(cls)
-            else:
-                app.add_documenter(cls)
+            app.add_autodocumenter(cls, override=True)
 
     # group event
     app.add_event('autodocsumm-grouper')

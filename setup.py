@@ -11,7 +11,7 @@ def readme():
 
 
 setup(name='autodocsumm',
-      version='0.1.13',
+      version='0.1.14',
       description='Extended sphinx autodoc including automatic autosummaries',
       long_description=readme(),
       long_description_content_type='text/x-rst',
@@ -36,7 +36,7 @@ setup(name='autodocsumm',
       license="GPLv2",
       packages=find_packages(exclude=['docs', 'tests*', 'examples']),
       install_requires=[
-          'sphinx',
+          'sphinx>=2.2',
       ],
       setup_requires=pytest_runner,
       tests_require=['pytest', 'sphinx-testing'],
