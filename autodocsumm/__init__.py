@@ -227,6 +227,29 @@ class AutosummaryDocumenter(object):
         self.options.update(options_save)
         return documenters
 
+    def add_autosummary(self):
+        """Add the autosammary table of this documenter"""
+
+        if self.options.autosummary:
+
+            grouped_documenters = self.get_grouped_documenters()
+
+            sourcename = self.get_sourcename()
+
+            for section, documenters in grouped_documenters.items():
+                self.add_line('**%s:**' % section, sourcename)
+
+                self.add_line('', sourcename)
+
+                self.add_line('.. autosummary::', sourcename)
+                self.add_line('', sourcename)
+                indent = '    '
+
+                for (documenter, _) in documenters:
+                    self.add_line(
+                        indent + '~' + documenter.fullname, sourcename)
+                self.add_line('', sourcename)
+
 
 class AutoSummModuleDocumenter(ModuleDocumenter, AutosummaryDocumenter):
     """Module documentor suitable for the :class:`AutoSummDirective`
@@ -263,6 +286,14 @@ class AutoSummModuleDocumenter(ModuleDocumenter, AutosummaryDocumenter):
     values correspond to the :attr:`sphinx.ext.autodoc.Documenter.member_order`
     attribute that shall be used for each section."""
 
+    def add_content(self, *args, **kwargs):
+        super().add_content(*args, **kwargs)
+
+        self.add_autosummary()
+
+        if self.options.autosummary_no_nesting:
+            self.options.autosummary = False
+
 
 class AutoSummClassDocumenter(ClassDocumenter, AutosummaryDocumenter):
     """Class documentor suitable for the :class:`AutoSummDirective`
@@ -298,6 +329,11 @@ class AutoSummClassDocumenter(ClassDocumenter, AutosummaryDocumenter):
     This dictionary defines the sections for the autosummmary option. The
     values correspond to the :attr:`sphinx.ext.autodoc.Documenter.member_order`
     attribute that shall be used for each section."""
+
+    def add_content(self, *args, **kwargs):
+        super().add_content(*args, **kwargs)
+
+        self.add_autosummary()
 
 
 class CallableDataDocumenter(DataDocumenter):
@@ -390,332 +426,6 @@ class CallableAttributeDocumenter(AttributeDocumenter):
         return doc
 
 
-class AutoSummDirective(AutodocDirective, Autosummary):
-    """automodule directive that makes a summary at the beginning of the module
-
-    This directive combines the
-    :class:`sphinx.ext.autodoc.directives.AutodocDirective` and
-    :class:`sphinx.ext.autosummary.Autosummary` directives to put a summary of
-    the specified module at the beginning of the module documentation."""
-
-    if sphinx_version < [1, 7]:
-        _default_flags = AutodocDirective._default_flags.union(
-            {'autosummary', 'autosummary-no-nesting'} | set(map('autosummary-{}'.format, member_options))
-            )
-    else:
-        AUTODOC_DEFAULT_OPTIONS.extend(['autosummary', 'autosummary-no-nesting'])
-        AUTODOC_DEFAULT_OPTIONS.extend(
-            map('autosummary-{}'.format, member_options))
-
-    @property
-    def autosummary_documenter(self):
-        """Returns the AutosummaryDocumenter subclass that can be used"""
-        try:
-            return self._autosummary_documenter
-        except AttributeError:
-            pass
-        objtype = self.name[4:]
-        env = self.state.document.settings.env
-        if sphinx_version < [1, 7]:
-            doc_class = self._registry[objtype]
-            params = self
-        else:
-            reporter = self.state.document.reporter
-            try:
-                lineno = reporter.get_source_and_line(self.lineno)[1]
-            except AttributeError:
-                lineno = None
-            doc_class = get_documenters(self.env.app)[objtype]
-            args = (self.state, ) if sphinx_version >= [2, 1] else ()
-            params = DocumenterBridge(
-                env, reporter,
-                process_documenter_options(doc_class, env.config,
-                                           self.options),
-                lineno, *args)
-        documenter = doc_class(params, self.arguments[0])
-        if hasattr(documenter, 'get_grouped_documenters'):
-            self._autosummary_documenter = documenter
-            return documenter
-        # in case the has been changed in the registry, we decide manually
-        if objtype == 'module':
-            documenter = AutoSummModuleDocumenter(params, self.arguments[0])
-        elif objtype == 'class':
-            documenter = AutoSummClassDocumenter(params, self.arguments[0])
-        else:
-            raise ValueError(
-                "Could not find a valid documenter for the object type %s" % (
-                    objtype))
-        self._autosummary_documenter = documenter
-        return documenter
-
-    def run(self):
-        """Run method for the directive"""
-        options_save = self.options.copy()
-        doc_nodes = AutodocDirective.run(self)
-        self.options.update(options_save)
-        if 'autosummary' not in self.options:
-            return doc_nodes
-        try:
-            self.env = self.state.document.settings.env
-        except AttributeError:
-            pass  # is set automatically with sphinx >= 1.8.0
-        if sphinx_version < [2, 0]:
-            self.warnings = []
-            self.result = ViewList()
-        documenter = self.autosummary_documenter
-        grouped_documenters = documenter.get_grouped_documenters()
-        nested = 'autosummary-no-nesting' not in self.options
-        summ_nodes = self.autosumm_nodes(documenter, grouped_documenters, nested)
-
-        dn = summ_nodes.pop(documenter.fullname)
-        if self.name == 'automodule':
-            doc_nodes = self.inject_summ_nodes(doc_nodes, summ_nodes)
-        # insert the nodes directly after the paragraphs
-        if self.name == 'autoclass':
-            for node in dn[::-1]:
-                self._insert_after_paragraphs(doc_nodes[1], node)
-            dn = []
-        elif self.name == 'automodule':
-            # insert table before the documentation of the members
-            istart = 2 if 'noindex' not in self.options else 0
-            # if we have a title in the module, we look for the section
-            if (len(doc_nodes) >= istart + 1 and
-                    isinstance(doc_nodes[istart], nodes.section)):
-                others = doc_nodes[istart]
-                istart = 2  # skip the title
-            else:
-                others = doc_nodes
-            found = False
-            if len(others[istart:]) >= 2:
-                for i in range(istart, len(others)):
-                    if isinstance(others[i], sphinx.addnodes.index):
-                        found = True
-                        break
-            if found:
-                for node in dn[::-1]:
-                    others.insert(i, node)
-                dn = []
-        if sphinx_version < [2, 0]:
-            return self.warnings + dn + doc_nodes
-        else:
-            return dn + doc_nodes
-
-    def _insert_after_paragraphs(self, node, insertion):
-        """Inserts the given `insertion` node after the paragraphs in `node`
-
-        This method inserts the `insertion` node after the instances of
-        nodes.paragraph in the given `node`.
-        Usually the node of one documented class is set up like
-
-        Name of the documented item (allways) (nodes.Element)
-        Summary (sometimes) (nodes.paragraph)
-        description (sometimes) (nodes.paragraph)
-        Parameters section (sometimes) (nodes.rubric)
-
-        We want to be below the description, so we loop until we
-        are below all the paragraphs. IF that does not work,
-        we simply put it at the end"""
-        found = False
-        if len(node) >= 2:
-            for i in range(len(node[1])):
-                if not isinstance(node[1][i], nodes.paragraph):
-                    node[1].insert(i + 1, insertion)
-                    found = True
-                    break
-        if not found:
-            node.insert(1, insertion)
-
-    def inject_summ_nodes(self, doc_nodes, summ_nodes):
-        """Method to inject the autosummary nodes into the autodoc nodes
-
-        Parameters
-        ----------
-        doc_nodes: list
-            The list of nodes as they are generated by the
-            :meth:`sphinx.ext.autodoc.AutodocDirective.run` method
-        summ_nodes: dict
-            The generated autosummary nodes as they are generated by the
-            :meth:`autosumm_nodes` method. Note that `summ_nodes` must only
-            contain the members autosummary tables!
-
-        Returns
-        -------
-        doc_nodes: list
-            The modified `doc_nodes`
-
-        Notes
-        -----
-        `doc_nodes` are modified in place and not copied!"""
-        def inject_summary(node):
-            if isinstance(node, nodes.section):
-                for sub in node:
-                    inject_summary(sub)
-                return
-            if (len(node) and (isinstance(node, nodes.section) or (
-                    isinstance(node[0], nodes.Element) and
-                    node[0].get('module') and node[0].get('fullname')))):
-                node_summ_nodes = summ_nodes.get("%s.%s" % (
-                    node[0]['module'], node[0]['fullname']))
-                if not node_summ_nodes:
-                    return
-                for summ_node in node_summ_nodes[::-1]:
-                    self._insert_after_paragraphs(node, summ_node)
-        for node in doc_nodes:
-            inject_summary(node)
-        return doc_nodes
-
-    def autosumm_nodes(self, documenter, grouped_documenters, nested):
-        """Create the autosummary nodes based on the documenter content
-
-        Parameters
-        ----------
-        documenter: sphinx.ext.autodoc.Documenter
-            The base (module or class) documenter for which to generate the
-            autosummary tables of its members
-        grouped_documenters: dict
-            The dictionary as it is returned from the
-            :meth:`AutosummaryDocumenter.get_grouped_documenters` method
-        nested: bool
-            If true, autosummary tables will also be created for members.
-
-        Returns
-        -------
-        dict
-            a mapping from the objects fullname to the corresponding
-            autosummary tables of its members. The objects include the main
-            object of the given `documenter` and the classes that are defined
-            in it
-
-        See Also
-        --------
-        AutosummaryDocumenter.get_grouped_documenters, inject_summ_nodes"""
-
-        summ_nodes = {}
-        this_nodes = []
-        for section, documenters in six.iteritems(grouped_documenters):
-            items = self.get_items_from_documenters(documenters)
-            if not items:
-                continue
-            node = nodes.rubric()
-            # create note for the section title (we could also use .. rubric
-            # but that causes problems for latex documentations)
-            self.state.nested_parse(
-                ViewList(['**%s**' % section]), 0, node)
-            this_nodes += node
-            this_nodes += self.get_table(items)
-            if nested:
-                for mdocumenter, check_module in documenters:
-                    if (mdocumenter.objtype == 'class' and
-                            not (check_module and not mdocumenter.check_module())):
-                        if hasattr(mdocumenter, 'get_grouped_documenters'):
-                            summ_nodes.update(self.autosumm_nodes(
-                                mdocumenter, mdocumenter.get_grouped_documenters(), nested)
-                                )
-        summ_nodes[documenter.fullname] = this_nodes
-        return summ_nodes
-
-    def get_items_from_documenters(self, documenters):
-        """Return the items needed for creating the tables
-
-        This method creates the items that are used by the
-        :meth:`sphinx.ext.autosummary.Autosummary.get_table` method by what is
-        taken from the values of the
-        :meth:`AutoSummModuleDocumenter.get_grouped_documenters` method.
-
-        Returns
-        -------
-        list
-            A list containing tuples like
-            ``(name, signature, summary_string, real_name)`` that can be used
-            for the :meth:`sphinx.ext.autosummary.Autosummary.get_table`
-            method."""
-
-        items = []
-
-        max_item_chars = 50
-        base_documenter = self.autosummary_documenter
-        try:
-            base_documenter.analyzer = ModuleAnalyzer.for_module(
-                    base_documenter.real_modname)
-            attr_docs = base_documenter.analyzer.find_attr_docs()
-        except PycodeError as err:
-            logger.debug('[autodocsumm] module analyzer failed: %s', err)
-            # no source file -- e.g. for builtin and C modules
-            base_documenter.analyzer = None
-            attr_docs = {}
-            # at least add the module.__file__ as a dependency
-            if (hasattr(base_documenter.module, '__file__') and
-                    base_documenter.module.__file__):
-                base_documenter.directive.filename_set.add(
-                    base_documenter.module.__file__)
-        else:
-            base_documenter.directive.filename_set.add(
-                base_documenter.analyzer.srcname)
-
-        for documenter, check_module in documenters:
-            documenter.parse_name()
-            documenter.import_object()
-            documenter.real_modname = documenter.get_real_modname()
-            real_name = documenter.fullname
-            display_name = documenter.object_name
-            if display_name is None:  # for instance attributes
-                display_name = documenter.objpath[-1]
-            if check_module and not documenter.check_module():
-                continue
-
-            # -- Grab the signature
-
-            sig = documenter.format_signature()
-            if not sig:
-                sig = ''
-            else:
-                max_chars = max(10, max_item_chars - len(display_name))
-                sig = mangle_signature(sig, max_chars=max_chars)
-#                sig = sig.replace('*', r'\*')
-
-            # -- Grab the documentation
-
-            no_docstring = False
-            if documenter.objpath:
-                key = ('.'.join(documenter.objpath[:-1]),
-                       documenter.objpath[-1])
-                try:
-                    doc = attr_docs[key]
-                    no_docstring = True
-                except KeyError:
-                    pass
-            if not no_docstring:
-                documenter.add_content(None)
-                doc = documenter.get_doc()
-                if doc:
-                    doc = doc[0]
-                else:
-                    continue
-
-            while doc and not doc[0].strip():
-                doc.pop(0)
-
-            # If there's a blank line, then we can assume the first sentence /
-            # paragraph has ended, so anything after shouldn't be part of the
-            # summary
-            for i, piece in enumerate(doc):
-                if not piece.strip():
-                    doc = doc[:i]
-                    break
-
-            # Try to find the "first sentence", which may span multiple lines
-            m = re.search(r"^([A-Z].*?\.)(?:\s|$)", " ".join(doc).strip())
-            if m:
-                summary = m.group(1).strip()
-            elif doc:
-                summary = doc[0].strip()
-            else:
-                summary = ''
-
-            items.append((display_name, sig, summary, real_name))
-        return items
-
-
 def dont_document_data(config, fullname):
     """Check whether the given object should be documented
 
@@ -780,6 +490,14 @@ def setup(app):
     app.setup_extension('sphinx.ext.autosummary')
     app.setup_extension('sphinx.ext.autodoc')
 
+    AUTODOC_DEFAULT_OPTIONS.extend(
+        [option for option in AutoSummModuleDocumenter.option_spec
+         if option not in AUTODOC_DEFAULT_OPTIONS])
+
+    AUTODOC_DEFAULT_OPTIONS.extend(
+        [option for option in AutoSummClassDocumenter.option_spec
+         if option not in AUTODOC_DEFAULT_OPTIONS])
+
     # make sure to allow inheritance when registering new documenters
     if sphinx_version < [1, 7]:
         registry = AutodocRegistry._registry
@@ -795,14 +513,6 @@ def setup(app):
                 app.add_autodocumenter(cls)
             else:
                 app.add_documenter(cls)
-
-    # directives
-    if sphinx_version >= [1, 8]:
-        app.add_directive('automodule', AutoSummDirective, override=True)
-        app.add_directive('autoclass', AutoSummDirective, override=True)
-    else:
-        app.add_directive('automodule', AutoSummDirective)
-        app.add_directive('autoclass', AutoSummDirective)
 
     # group event
     app.add_event('autodocsumm-grouper')
