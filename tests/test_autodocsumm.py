@@ -118,7 +118,10 @@ class TestAutosummaryDocumenter(unittest.TestCase):
         app.build()
         html = get_html(app, '/test_class.html')
 
-        self.assertIn('<span class="pre">instance_attribute</span>', html)
+        if sphinx_version[:2] != [3, 1]:
+            self.assertIn(
+                '<span class="pre">dummy.TestClass.instance_attribute</span>',
+                html)
 
         self.assertIn('<span class="pre">test_method</span>', html)
         self.assertIn('<span class="pre">test_attr</span>', html)
@@ -158,7 +161,10 @@ class TestAutosummaryDocumenter(unittest.TestCase):
         app.build()
         html = get_html(app, '/test_class_summary_only.html')
 
-        self.assertIn('<span class="pre">instance_attribute</span>', html)
+        if sphinx_version[:2] != [3, 1]:
+            self.assertIn(
+                '<span class="pre">dummy.TestClass.instance_attribute</span>',
+                html)
 
         self.assertIn('<span class="pre">test_method</span>', html)
         self.assertIn('<span class="pre">test_attr</span>', html)
