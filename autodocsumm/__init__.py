@@ -1,20 +1,24 @@
-"""Sphinx extension that defines a new automodule directive with autosummary
+"""Sphinx extension that defines new auto documenters with autosummary.
 
-The :class:`AutoSummDirective` defined in this extension module allows the
-same functionality as the automodule and autoclass directives of the
-:mod:`sphinx.ext.autodoc` module but with an additional `autosummary` option.
-This option puts a autosummary in the style of the
-:mod:`sphinx.ext.autosummary` module at the beginning of the class or module.
-The content of this autosummary is automatically determined by the results of
-the automodule (or autoclass) directive.
+The :class:`AutoSummModuleDocumenter` and :class:`AutoSummClassDocumenter`
+classes defined here enable an autosummary-style listing of the corresponding
+members.
 
 This extension gives also the possibility to choose which data shall be shown
 and to include the docstring of the ``'__call__'`` attribute.
 """
-import logging
+from itertools import chain
+
+from sphinx.util import logging
 import re
 import six
+
+from docutils import nodes
+
 import sphinx
+
+from sphinx.util.docutils import SphinxDirective
+
 from sphinx.ext.autodoc import (
     ClassDocumenter, ModuleDocumenter, ALL, PycodeError,
     ModuleAnalyzer, bool_option, AttributeDocumenter, DataDocumenter, Options,
@@ -23,7 +27,10 @@ import sphinx.ext.autodoc as ad
 
 signature = Signature = None
 
-from sphinx.ext.autodoc.directive import AUTODOC_DEFAULT_OPTIONS
+from sphinx.ext.autodoc.directive import (
+    AutodocDirective, AUTODOC_DEFAULT_OPTIONS, process_documenter_options,
+    DocumenterBridge
+)
 
 from sphinx.ext.autodoc import get_documenters
 
@@ -77,11 +84,16 @@ elif Signature is not None:  # sphinx >= 1.7
             return args
 
 
+def list_option(option):
+    """Transform a string to a list by splitting at ;;."""
+    return [s.strip() for s in option.split(";;")]
+
+
 class AutosummaryDocumenter(object):
     """Abstract class for for extending Documenter methods
 
     This classed is used as a base class for Documenters in order to provide
-    the necessary methods for the :class:`AutoSummDirective`."""
+    the necessary methods for generating the autosummary."""
 
     #: List of functions that may filter the members
     filter_funcs = []
@@ -108,15 +120,15 @@ class AutosummaryDocumenter(object):
             dictionary whose keys are determined by the :attr:`member_sections`
             dictionary and whose values are lists of tuples. Each tuple
             consists of a documenter and a boolean to identify whether a module
-            check should be made describes an attribute or not. The dictionary
-            can be used in the
-            :meth:`AutoSummDirective.get_items_from_documenters` method
+            check should be made describes an attribute or not.
 
         Notes
         -----
         If a :class:`sphinx.ext.autodoc.Documenter.member_order` value is not
         in the :attr:`member_sections` dictionary, it will be put into an
         additional `Miscellaneous` section."""
+        use_sections = self.options.autosummary_sections
+
         self.parse_name()
         self.import_object()
         # If there is no real module defined, figure out which to use.
@@ -145,6 +157,13 @@ class AutosummaryDocumenter(object):
         self.env.temp_data['autodoc:module'] = self.modname
         if self.objpath:
             self.env.temp_data['autodoc:class'] = self.objpath[0]
+
+        if not self.options.autosummary_force_inline:
+            docstring = self.get_doc()
+            autodocsumm_directive = '.. auto%ssumm::' % self.objtype
+            for s in chain.from_iterable(docstring):
+                if autodocsumm_directive in s:
+                    return {}
 
         # set the members from the autosummary member options
         options_save = {}
@@ -195,7 +214,8 @@ class AutosummaryDocumenter(object):
                     'autodocsumm-grouper', self.objtype, e[0].object_name,
                     e[0].object, section, self.object)
                 section = user_section or section
-            documenters.setdefault(section, []).append(e)
+            if not use_sections or section in use_sections:
+                documenters.setdefault(section, []).append(e)
         self.options.update(options_save)
         return documenters
 
@@ -208,7 +228,8 @@ class AutosummaryDocumenter(object):
             sourcename = self.get_sourcename()
 
             for section, documenters in grouped_documenters.items():
-                self.add_line('**%s:**' % section, sourcename)
+                if not self.options.autosummary_no_titles:
+                    self.add_line('**%s:**' % section, sourcename)
 
                 self.add_line('', sourcename)
 
@@ -223,12 +244,13 @@ class AutosummaryDocumenter(object):
 
 
 class AutoSummModuleDocumenter(ModuleDocumenter, AutosummaryDocumenter):
-    """Module documentor suitable for the :class:`AutoSummDirective`
+    """Module documentor with autosummary tables of its members.
 
     This class has the same functionality as the base
     :class:`sphinx.ext.autodoc.ModuleDocumenter` class but with an additional
-    `autosummary` and the :meth:`get_grouped_documenters` method.
-    It's priority is slightly higher than the one of the ModuleDocumenter."""
+    `autosummary`.
+    It's priority is slightly higher than the one of the ModuleDocumenter.
+    """
 
     #: slightly higher priority than
     #: :class:`sphinx.ext.autodoc.ModuleDocumenter`
@@ -239,6 +261,9 @@ class AutoSummModuleDocumenter(ModuleDocumenter, AutosummaryDocumenter):
     option_spec = ModuleDocumenter.option_spec.copy()
     option_spec['autosummary'] = bool_option
     option_spec['autosummary-no-nesting'] = bool_option
+    option_spec['autosummary-sections'] = list_option
+    option_spec['autosummary-no-titles'] = bool_option
+    option_spec['autosummary-force-inline'] = bool_option
 
     #: Add options for members for the autosummary
     for _option in member_options.intersection(option_spec):
@@ -267,13 +292,14 @@ class AutoSummModuleDocumenter(ModuleDocumenter, AutosummaryDocumenter):
 
 
 class AutoSummClassDocumenter(ClassDocumenter, AutosummaryDocumenter):
-    """Class documentor suitable for the :class:`AutoSummDirective`
+    """Class documentor with autosummary tables for its members.
 
     This class has the same functionality as the base
     :class:`sphinx.ext.autodoc.ClassDocumenter` class but with an additional
     `autosummary` option to provide the ability to provide a summary of all
-    methods and attributes at the beginning.
-    It's priority is slightly higher than the one of the ClassDocumenter"""
+    methods and attributes.
+    It's priority is slightly higher than the one of the ClassDocumenter
+    """
 
     #: slightly higher priority than
     #: :class:`sphinx.ext.autodoc.ClassDocumenter`
@@ -284,6 +310,9 @@ class AutoSummClassDocumenter(ClassDocumenter, AutosummaryDocumenter):
     option_spec = ClassDocumenter.option_spec.copy()
     option_spec['autosummary'] = bool_option
     option_spec['autosummary-no-nesting'] = bool_option
+    option_spec['autosummary-sections'] = list_option
+    option_spec['autosummary-no-titles'] = bool_option
+    option_spec['autosummary-force-inline'] = bool_option
 
     #: Add options for members for the autosummary
     for _option in member_options.intersection(option_spec):
@@ -453,10 +482,72 @@ class NoDataAttributeDocumenter(CallableAttributeDocumenter):
             self.options.annotation = ' '
 
 
+class AutoDocSummDirective(SphinxDirective):
+    """A directive to generate an autosummary.
+
+    Usage::
+
+        .. autoclasssum:: <Class>
+
+        .. automodsum:: <module>
+
+    The directive additionally supports all options of the ``autoclass`` or
+    ``automod`` directive respectively. Sections can be a list of section titles
+    to be included. If ommitted, all sections are used.
+    """
+
+    has_content = False
+
+    option_spec = AutodocDirective.option_spec
+
+    required_arguments = 1
+    optional_arguments = 0
+
+    def run(self):
+        reporter = self.state.document.reporter
+
+        try:
+            source, lineno = reporter.get_source_and_line(self.lineno)
+        except AttributeError:
+            source, lineno = (None, None)
+
+        # look up target Documenter
+        objtype = self.name[4:-4]  # strip prefix (auto-) and suffix (-summ).
+        doccls = self.env.app.registry.documenters[objtype]
+
+        self.options['autosummary-force-inline'] = True
+
+        # process the options with the selected documenter's option_spec
+        try:
+            documenter_options = process_documenter_options(doccls, self.config,
+                                                            self.options)
+        except (KeyError, ValueError, TypeError) as exc:
+            # an option is either unknown or has a wrong type
+            logger.error(
+                f'An option to {self.name} is either unknown or has an invalid '
+                f'value: {exc}',
+                location=(self.env.docname, lineno))
+            return []
+
+        # generate the output
+        params = DocumenterBridge(self.env, reporter, documenter_options,
+                                  lineno, self.state)
+        documenter = doccls(params, self.arguments[0])
+        documenter.add_autosummary()
+
+        node = nodes.paragraph()
+        node.document = self.state.document
+        self.state.nested_parse(params.result, 0, node)
+
+        return node.children
+
+
 def setup(app):
     """setup function for using this module as a sphinx extension"""
     app.setup_extension('sphinx.ext.autosummary')
     app.setup_extension('sphinx.ext.autodoc')
+    app.add_directive('autoclasssumm', AutoDocSummDirective)
+    app.add_directive('automodulesumm', AutoDocSummDirective)
 
     AUTODOC_DEFAULT_OPTIONS.extend(
         [option for option in AutoSummModuleDocumenter.option_spec

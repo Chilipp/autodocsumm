@@ -1,4 +1,5 @@
 import sys
+import re
 import os.path as osp
 import unittest
 from sphinx_testing import with_app
@@ -196,6 +197,111 @@ class TestAutosummaryDocumenter(unittest.TestCase):
         with self.assertWarnsRegex(sphinx.deprecation.RemovedInSphinx40Warning,
                                    r'(?s).*Autosummary.warnings'):
             app.build()
+
+    @with_app(buildername='html', srcdir=sphinx_supp,
+              copy_srcdir_to_tmpdir=True)
+    def test_autoclasssumm_inline(self, app, status, warning):
+        """Test an AutoDocSummDirective inline."""
+        app.build()
+
+        html = get_html(app, '/test_autoclasssumm_inline.html')
+
+        methods_title = "<strong>Methods:</strong>"
+
+        num_section_findings = len(re.findall(methods_title, html))
+
+        self.assertEqual(num_section_findings, 1)
+
+        methods_start = html.index(methods_title)
+        docstring_end = html.index("This is after the summary")
+
+        self.assertGreater(docstring_end, methods_start)
+
+
+class TestAutoDocSummDirective(unittest.TestCase):
+    """Test case for the :class:`autodocsumm.AutoDocSummDirective`."""
+
+    @with_app(buildername='html', srcdir=sphinx_supp,
+              copy_srcdir_to_tmpdir=True)
+    def test_autoclasssumm(self, app, status, warning):
+        """Test building the autosummary of a class."""
+        app.build()
+
+        html = get_html(app, '/test_autoclasssumm.html')
+
+        # the class docstring must not be in the html
+        self.assertNotIn("Class test for autosummary", html)
+
+        # test if the methods and attributes are there in a table
+        self.assertIn('<span class="pre">test_method</span>', html)
+        self.assertIn('<span class="pre">test_attr</span>', html)
+
+    @with_app(buildername='html', srcdir=sphinx_supp,
+              copy_srcdir_to_tmpdir=True)
+    def test_autoclasssumm_no_titles(self, app, status, warning):
+        """Test building the autosummary of a class."""
+        app.build()
+
+        html = get_html(app, '/test_autoclasssumm_no_titles.html')
+
+        # the class docstring must not be in the html
+        self.assertNotIn("Class test for autosummary", html)
+
+        # test if the methods and attributes are there in a table
+        self.assertIn('<span class="pre">test_method</span>', html)
+        self.assertIn('<span class="pre">test_attr</span>', html)
+
+        self.assertNotIn("<strong>Methods</strong>", html)
+
+    @with_app(buildername='html', srcdir=sphinx_supp,
+              copy_srcdir_to_tmpdir=True)
+    def test_autoclasssumm_some_sections(self, app, status, warning):
+        """Test building the autosummary of a class with some sections only."""
+        app.build()
+
+        html = get_html(app, '/test_autoclasssumm_some_sections.html')
+
+        # the class docstring must not be in the html
+        self.assertNotIn("Class test for autosummary", html)
+
+        # test if the methods and attributes are there in a table
+        self.assertNotIn('<span class="pre">test_method</span>', html)
+        self.assertIn('<span class="pre">class_caller</span>', html)
+        self.assertIn('<span class="pre">test_attr</span>', html)
+
+    @with_app(buildername='html', srcdir=sphinx_supp,
+              copy_srcdir_to_tmpdir=True)
+    def test_automodulesumm(self, app, status, warning):
+        """Test building the autosummary of a module."""
+        app.build()
+
+        html = get_html(app, '/test_automodulesumm.html')
+
+        # the class docstring must not be in the html
+        self.assertNotIn("Module for testing the autodocsumm", html)
+
+        # test if the classes, data and functions are there in a table
+        self.assertIn('<span class="pre">Class_CallTest</span>', html)
+        self.assertIn('<span class="pre">large_data</span>', html)
+        self.assertIn('<span class="pre">test_func</span>', html)
+
+    @with_app(buildername='html', srcdir=sphinx_supp,
+              copy_srcdir_to_tmpdir=True)
+    def test_automodulesumm_some_sections(self, app, status, warning):
+        """Test building the autosummary of a module with some sections only."""
+        app.build()
+
+        html = get_html(app, '/test_automodulesumm_some_sections.html')
+
+        # the class docstring must not be in the html
+        self.assertNotIn("Module for testing the autodocsumm", html)
+
+        # test if the classes, data and functions are there in a table
+        self.assertNotIn('<span class="pre">Class_CallTest</span>', html)
+        self.assertIn('<span class="pre">large_data</span>', html)
+        self.assertIn('<span class="pre">test_func</span>', html)
+
+
 
 
 if __name__ == '__main__':
