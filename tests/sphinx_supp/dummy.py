@@ -72,6 +72,19 @@ class InheritedTestClass(TestClass):
     """Class test for inherited attributes"""
 
 
+class TestClassWithInlineAutoClassSumm:
+    """Class test for the autodocsummary inline
+
+    .. autoclasssumm:: TestClassWithInlineAutoClassSumm
+
+    This is after the summary.
+    """
+
+    def test_method_of_inline_test(self):
+        """A test method."""
+        pass
+
+
 #: data to be skipped
 large_data = 'Should also be skipped'
 

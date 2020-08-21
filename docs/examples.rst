@@ -138,3 +138,68 @@ which gives us
     :members:
     :autosummary:
     :autosummary-no-nesting:
+
+
+.. _select-sections-example:
+
+Select the sections to document
+-------------------------------
+You can select, which sections to document. If you only want the *Methods*
+section of a class, you can specify::
+
+    .. autoclass:: dummy.MyClass
+        :members:
+        :autosummary:
+        :autosummary-sections: Methods
+
+Multiple sections might be separated by `;;`, e.g.
+``:autosummary-sections: Methods ;; Attributes``.
+
+This also works for the ``autoclasssumm`` and ``automodulesumm`` directives,
+e.g.::
+
+    .. autoclasssumm:: dummy.SomeClass
+        :autosummary-sections: Methods
+
+.. autoclasssumm:: dummy.MyClass
+    :autosummary-sections: Methods
+
+
+.. _autosummary-position-example:
+
+Positioning of the autosummary table
+------------------------------------
+By default, the autosummary tables are put at the end of the docstring sections
+for classes and methods, i.e. something like::
+
+    class-name
+    class-docstring
+    autosummary-tables
+    class-members
+
+You can customize this positioning by calling the ``.. autoclasssumm::``
+directive inside the class docstring, e.g.
+
+.. literalinclude:: inline_autoclasssumm.py
+
+Documenting this, with ``.. autoclass:: MyClass`` creates
+
+.. autoclass:: inline_autoclasssumm.MyClass
+    :noindex:
+    :members:
+
+Note that this omits the `Attributes` section as we specified the
+``:autosummary-sections:`` options here. If you want to list this section
+anyway at the end of the docstring, you can use the ``autosummary-force-inline``
+option, e.g.::
+
+    .. autoclass:: inline_autoclasssumm.MyClass
+        :members:
+        :autosummary-force-inline:
+        :autosummary-sections: Attributes
+
+.. autoclass:: inline_autoclasssumm.MyClass
+    :members:
+    :noindex:
+    :autosummary-force-inline:
+    :autosummary-sections: Attributes
