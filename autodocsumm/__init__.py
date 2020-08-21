@@ -516,6 +516,9 @@ class AutoDocSummDirective(SphinxDirective):
         doccls = self.env.app.registry.documenters[objtype]
 
         self.options['autosummary-force-inline'] = True
+        self.options['autosummary'] = True
+        if 'no-members' not in self.options:
+            self.options['members'] = True
 
         # process the options with the selected documenter's option_spec
         try:
