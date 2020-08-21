@@ -8,6 +8,7 @@ python:
   - "3.6"
 env:
   - SPHINX_VERSION=""
+  - SPHINX_VERSION=3.2.*
   - SPHINX_VERSION=3.1.*
   - SPHINX_VERSION=3.0.*
   - SPHINX_VERSION=2.4.*
