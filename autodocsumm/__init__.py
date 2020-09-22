@@ -527,8 +527,8 @@ class AutoDocSummDirective(SphinxDirective):
         except (KeyError, ValueError, TypeError) as exc:
             # an option is either unknown or has a wrong type
             logger.error(
-                f'An option to {self.name} is either unknown or has an invalid '
-                f'value: {exc}',
+                'An option to %s is either unknown or has an invalid '
+                'value: %s', self.name, exc,
                 location=(self.env.docname, lineno))
             return []
 
