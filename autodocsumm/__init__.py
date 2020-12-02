@@ -184,7 +184,7 @@ class AutosummaryDocumenter(object):
         registry = get_documenters(self.env.app)
 
         for (mname, member, isattr) in self.filter_members(members, want_all):
-            classes = [cls for cls in registry.values():
+            classes = [cls for cls in registry.values()]:
                        if cls.can_document_member(member, mname, isattr, self)]
             if not classes:
                 # don't know how to document this member
