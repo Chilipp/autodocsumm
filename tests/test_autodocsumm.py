@@ -309,7 +309,14 @@ class TestAutoDocSummDirective(unittest.TestCase):
         self.assertIn('<span class="pre">large_data</span>', html)
         self.assertIn('<span class="pre">test_func</span>', html)
 
+    @with_app(buildername='html', srcdir=sphinx_supp,
+              copy_srcdir_to_tmpdir=True)
+    def test_empty(self, app, status, warning):
+        app.build()
 
+        html = get_html(app, '/test_empty.html')
+
+        self.assertNotIn("product", html)
 
 
 if __name__ == '__main__':
