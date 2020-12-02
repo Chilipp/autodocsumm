@@ -162,6 +162,27 @@ class TestAutosummaryDocumenter(unittest.TestCase):
 
     @with_app(buildername='html', srcdir=sphinx_supp,
               copy_srcdir_to_tmpdir=True)
+    def test_class_order(self, app, status, warning):
+        app.build()
+        html = get_html(app, '/test_class_order.html')
+
+        if sphinx_version[:2] > [3, 1]:
+            self.assertIn(
+                '<span class="pre">instance_attribute</span>',
+                html)
+        elif sphinx_version[:2] < [3, 1]:
+            self.assertIn(
+                '<span class="pre">dummy.TestClass.instance_attribute</span>',
+                html)
+
+        self.assertIn('<span class="pre">test_attr</span>', html)
+        self.assertIn('<span class="pre">large_data</span>', html)
+
+        self.assertLess(html.index('<span class="pre">test_attr</span>'),
+                        html.index('<span class="pre">large_data</span>'))
+
+    @with_app(buildername='html', srcdir=sphinx_supp,
+              copy_srcdir_to_tmpdir=True)
     def test_class_summary_only(self, app, status, warning):
         app.build()
         html = get_html(app, '/test_class_summary_only.html')
