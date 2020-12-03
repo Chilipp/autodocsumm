@@ -15,3 +15,4 @@ Example documentation
     test_autoclasssumm_no_titles
     test_automodulesumm
     test_automodulesumm_some_sections
+    test_empty

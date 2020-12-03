@@ -62,3 +62,5 @@ target/
 
 # Example ipython notebook checkpoints
 *.ipynb_checkpoints/
+
+.mypy_cache

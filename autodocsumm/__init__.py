@@ -206,6 +206,8 @@ class AutosummaryDocumenter(object):
             if self.env.app:
                 e[0].parse_name()
                 e[0].import_object()
+                if members_check_module and not e[0].check_module():
+                    continue
                 user_section = self.env.app.emit_firstresult(
                     'autodocsumm-grouper', self.objtype, e[0].object_name,
                     e[0].object, section, self.object)
