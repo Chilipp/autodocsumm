@@ -18,7 +18,7 @@ Extending your autodoc API docs with a summary
         * - docs
           - |docs|
         * - tests
-          - |travis| |requires| |coveralls|
+          - |github-action| |requires| |coveralls|
         * - package
           - |version| |supported-versions| |supported-implementations|
 
@@ -26,9 +26,9 @@ Extending your autodoc API docs with a summary
         :alt: Documentation Status
         :target: http://autodocsumm.readthedocs.io/en/latest/?badge=latest
 
-    .. |travis| image:: https://travis-ci.org/Chilipp/autodocsumm.svg?branch=master
-        :alt: Travis
-        :target: https://travis-ci.org/Chilipp/autodocsumm
+    .. |github-action| image:: https://github.com/Chilipp/autodocsumm/workflows/Tests/badge.svg
+        :alt: Tests
+        :target: https://github.com/Chilipp/autodocsumm/actions?query=workflow%3A%22Tests%22
 
     .. |coveralls| image:: https://coveralls.io/repos/github/Chilipp/autodocsumm/badge.svg?branch=master
         :alt: Coverage
