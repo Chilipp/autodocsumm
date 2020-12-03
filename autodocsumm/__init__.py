@@ -207,7 +207,12 @@ class AutosummaryDocumenter(object):
         member_order = (
             self.options.member_order or self.env.config.autodoc_member_order
         )
-        memberdocumenters = self.sort_members(memberdocumenters, member_order)
+        try:
+            memberdocumenters = self.sort_members(
+                memberdocumenters, member_order
+            )
+        except AttributeError:  # sphinx<3.0
+            pass
 
         documenters = OrderedDict()
         for e in memberdocumenters:
