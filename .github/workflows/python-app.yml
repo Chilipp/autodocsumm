@@ -34,8 +34,12 @@ jobs:
         if [[ $SPHINX_VERSION != "" ]]; then
           SPHINX="${SPHINX}==${SPHINX_VERSION}";
         fi
-        pip install pytest pytest-cov codecov "${SPHINX}" sphinx-testing .
+        pip install pytest pytest-cov codecov "${SPHINX}" sphinx-testing -e .
     - name: Test with pytest
       run: |
-        pytest --cov=autodocsumm --cov-report=xml
+        pytest --cov=autodocsumm --cov-report=xml tests
+    - name: Upload codecov
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      run: |
         codecov
