@@ -316,7 +316,7 @@ class TestAutoDocSummDirective(unittest.TestCase):
 
         html = get_html(app, '/test_empty.html')
 
-        self.assertNotIn("product", html)
+        self.assertNotIn('<span class="pre">product</span>', html)
 
 
 if __name__ == '__main__':
