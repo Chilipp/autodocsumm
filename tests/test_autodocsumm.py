@@ -162,6 +162,9 @@ class TestAutosummaryDocumenter(unittest.TestCase):
 
     @with_app(buildername='html', srcdir=sphinx_supp,
               copy_srcdir_to_tmpdir=True)
+    @unittest.skipIf(
+        sphinx_version[:2] < [3, 0], "Only available for sphinx>=3"
+    )
     def test_class_order(self, app, status, warning):
         app.build()
         html = get_html(app, '/test_class_order.html')
