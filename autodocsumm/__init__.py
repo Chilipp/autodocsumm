@@ -11,7 +11,6 @@ from itertools import chain
 
 from sphinx.util import logging
 import re
-import six
 
 from docutils import nodes
 
@@ -51,9 +50,6 @@ except ImportError:
         from collections import OrderedDict
     except ImportError:
         from ordereddict import OrderedDict
-
-if six.PY2:
-    from itertools import imap as map
 
 __version__ = '0.2.1'
 
@@ -188,7 +184,7 @@ class AutosummaryDocumenter(object):
         registry = get_documenters(self.env.app)
 
         for (mname, member, isattr) in self.filter_members(members, want_all):
-            classes = [cls for cls in six.itervalues(registry)
+            classes = [cls for cls in registry.values()
                        if cls.can_document_member(member, mname, isattr, self)]
             if not classes:
                 # don't know how to document this member
@@ -372,7 +368,7 @@ class CallableDataDocumenter(DataDocumenter):
 
         doc = []
         for docstring in docstrings:
-            if not isinstance(docstring, six.text_type):
+            if not isinstance(docstring, str):
                 docstring = force_decode(docstring, encoding)
             doc.append(prepare_docstring(docstring, ignore))
 
@@ -416,7 +412,7 @@ class CallableAttributeDocumenter(AttributeDocumenter):
 
         doc = []
         for docstring in docstrings:
-            if not isinstance(docstring, six.text_type):
+            if not isinstance(docstring, str):
                 docstring = force_decode(docstring, encoding)
             doc.append(prepare_docstring(docstring, ignore))
 
