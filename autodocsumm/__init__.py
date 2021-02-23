@@ -155,7 +155,7 @@ class AutosummaryDocumenter(object):
             self.env.temp_data['autodoc:class'] = self.objpath[0]
 
         if not self.options.autosummary_force_inline:
-            docstring = self.get_doc()
+            docstring = self.get_doc() or []
             autodocsumm_directive = '.. auto%ssumm::' % self.objtype
             for s in chain.from_iterable(docstring):
                 if autodocsumm_directive in s:
