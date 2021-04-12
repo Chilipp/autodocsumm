@@ -20,6 +20,8 @@ not_document_data = [
     'dummy.large_data', 'dummy.TestClass.small_data',
     'dummy_title.large_data', 'dummy_title.TestClass.small_data']
 
+autodoc_typehints = "description"
+
 autodata_content = 'both'
 
 

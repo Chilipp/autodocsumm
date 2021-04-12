@@ -20,7 +20,7 @@ from sphinx.util.docutils import SphinxDirective
 
 from sphinx.ext.autodoc import (
     ClassDocumenter, ModuleDocumenter, ALL, PycodeError,
-    ModuleAnalyzer, bool_option, AttributeDocumenter, DataDocumenter, Options,
+    ModuleAnalyzer, AttributeDocumenter, DataDocumenter, Options,
     prepare_docstring)
 import sphinx.ext.autodoc as ad
 
@@ -83,6 +83,10 @@ elif Signature is not None:  # sphinx >= 1.7
 def list_option(option):
     """Transform a string to a list by splitting at ;;."""
     return [s.strip() for s in option.split(";;")]
+
+
+def bool_option(*args):
+    return "True"
 
 
 class AutosummaryDocumenter(object):
@@ -155,7 +159,7 @@ class AutosummaryDocumenter(object):
             self.env.temp_data['autodoc:class'] = self.objpath[0]
 
         if not self.options.autosummary_force_inline:
-            docstring = self.get_doc()
+            docstring = self.get_doc() or []
             autodocsumm_directive = '.. auto%ssumm::' % self.objtype
             for s in chain.from_iterable(docstring):
                 if autodocsumm_directive in s:
@@ -230,7 +234,10 @@ class AutosummaryDocumenter(object):
 
     def add_autosummary(self):
         """Add the autosammary table of this documenter."""
-        if self.options.autosummary:
+        if (
+            self.options.get("autosummary")
+            and not self.options.get("no-autosummary")
+        ):
 
             grouped_documenters = self.get_grouped_documenters()
 
@@ -296,8 +303,8 @@ class AutoSummModuleDocumenter(ModuleDocumenter, AutosummaryDocumenter):
 
         self.add_autosummary()
 
-        if self.options.autosummary_no_nesting:
-            self.options.autosummary = False
+        if self.options.get("autosummary-no-nesting"):
+            self.options["no-autosummary"] = "True"
 
 
 class AutoSummClassDocumenter(ClassDocumenter, AutosummaryDocumenter):
@@ -524,10 +531,10 @@ class AutoDocSummDirective(SphinxDirective):
         objtype = self.name[4:-4]  # strip prefix (auto-) and suffix (-summ).
         doccls = self.env.app.registry.documenters[objtype]
 
-        self.options['autosummary-force-inline'] = True
-        self.options['autosummary'] = True
+        self.options['autosummary-force-inline'] = "True"
+        self.options['autosummary'] = "True"
         if 'no-members' not in self.options:
-            self.options['members'] = True
+            self.options['members'] = ""
 
         # process the options with the selected documenter's option_spec
         try:
