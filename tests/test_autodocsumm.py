@@ -49,7 +49,6 @@ class TestAutosummaryDocumenter(unittest.TestCase):
         self.assertIn('<span class="pre">large_data</span>', html)
         self.assertIn('<span class="pre">small_data</span>', html)
 
-        self.assertNotIn('Should be skipped', html)
         try:
             self.assertIn('Should be included', html)
         except AssertionError: # sphinx>=3.5
@@ -59,8 +58,15 @@ class TestAutosummaryDocumenter(unittest.TestCase):
                 '<span class="pre">included\'</span>',
                 html
             )
+            self.assertNotIn(
+                '<span class="pre">\'Should</span> '
+                '<span class="pre">be</span> '
+                '<span class="pre">skipped\'</span>',
+                html
+            )
+        else:
+            self.assertNotIn('Should be skipped', html)
 
-        self.assertNotIn('Should also be skipped', html)
         try:
             self.assertIn('Should also be included', html)
         except AssertionError: # sphinx>=3.5
@@ -71,6 +77,15 @@ class TestAutosummaryDocumenter(unittest.TestCase):
                 '<span class="pre">included\'</span>',
                 html
             )
+            self.assertNotIn(
+                '<span class="pre">\'Should</span> '
+                '<span class="pre">also</span> '
+                '<span class="pre">be</span> '
+                '<span class="pre">skipped\'</span>',
+                html
+            )
+        else:
+            self.assertNotIn('Should also be skipped', html)
 
     @with_app(buildername='html', srcdir=sphinx_supp,
               copy_srcdir_to_tmpdir=True)
@@ -86,8 +101,18 @@ class TestAutosummaryDocumenter(unittest.TestCase):
         self.assertIn('<span class="pre">small_data</span>', html)
 
         # test that elements of TestClass are not autosummarized, since nesting is disabled.
-        self.assertNotIn('<span class="pre">test_method</span>', html)
-        self.assertNotIn('<span class="pre">test_attr</span>', html)
+        try:
+            self.assertNotIn('<span class="pre">test_method</span>', html)
+            self.assertNotIn('<span class="pre">test_attr</span>', html)
+        except AssertionError:  # sphinx>=3.5
+            self.assertEqual(
+                len(re.findall('<span class="pre">test_method</span>', html)),
+                1,
+            )
+            self.assertEqual(
+                len(re.findall('<span class="pre">test_attr</span>', html)),
+                1,
+            )
 
         # test the members are still displayed
         self.assertIn('<dt id="dummy.Class_CallTest">', html)
@@ -123,12 +148,42 @@ class TestAutosummaryDocumenter(unittest.TestCase):
         # test whether the data is shown correctly
         self.assertIn('<span class="pre">large_data</span>', html)
         self.assertIn('<span class="pre">small_data</span>', html)
-
-        self.assertNotIn('Should be skipped', html)
-        self.assertIn('Should be included', html)
-
-        self.assertNotIn('Should also be skipped', html)
-        self.assertIn('Should also be included', html)
+        try:
+            self.assertIn('Should be included', html)
+        except AssertionError: # sphinx>=3.5
+            self.assertIn(
+                '<span class="pre">\'Should</span> '
+                '<span class="pre">be</span> '
+                '<span class="pre">included\'</span>',
+                html
+            )
+            self.assertNotIn(
+                '<span class="pre">\'Should</span> '
+                '<span class="pre">be</span> '
+                '<span class="pre">skipped\'</span>',
+                html
+            )
+        else:
+            self.assertNotIn('Should be skipped', html)
+        try:
+            self.assertIn('Should also be included', html)
+        except AssertionError: # sphinx>=3.5
+            self.assertIn(
+                '<span class="pre">\'Should</span> '
+                '<span class="pre">also</span> '
+                '<span class="pre">be</span> '
+                '<span class="pre">included\'</span>',
+                html
+            )
+            self.assertNotIn(
+                '<span class="pre">\'Should</span> '
+                '<span class="pre">also</span> '
+                '<span class="pre">be</span> '
+                '<span class="pre">skipped\'</span>',
+                html
+            )
+        else:
+            self.assertNotIn('Should also be skipped', html)
 
     @with_app(buildername='html', srcdir=sphinx_supp,
               copy_srcdir_to_tmpdir=True)

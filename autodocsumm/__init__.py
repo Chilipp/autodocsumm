@@ -303,7 +303,7 @@ class AutoSummModuleDocumenter(ModuleDocumenter, AutosummaryDocumenter):
 
         self.add_autosummary()
 
-        if self.options.autosummary_no_nesting:
+        if self.options.get("autosummary-no-nesting"):
             self.options["no-autosummary"] = "True"
 
 
