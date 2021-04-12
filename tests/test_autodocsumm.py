@@ -50,10 +50,27 @@ class TestAutosummaryDocumenter(unittest.TestCase):
         self.assertIn('<span class="pre">small_data</span>', html)
 
         self.assertNotIn('Should be skipped', html)
-        self.assertIn('Should be included', html)
+        try:
+            self.assertIn('Should be included', html)
+        except AssertionError: # sphinx>=3.5
+            self.assertIn(
+                '<span class="pre">\'Should</span> '
+                '<span class="pre">be</span> '
+                '<span class="pre">included\'</span>',
+                html
+            )
 
         self.assertNotIn('Should also be skipped', html)
-        self.assertIn('Should also be included', html)
+        try:
+            self.assertIn('Should also be included', html)
+        except AssertionError: # sphinx>=3.5
+            self.assertIn(
+                '<span class="pre">\'Should</span> '
+                '<span class="pre">also</span> '
+                '<span class="pre">be</span> '
+                '<span class="pre">included\'</span>',
+                html
+            )
 
     @with_app(buildername='html', srcdir=sphinx_supp,
               copy_srcdir_to_tmpdir=True)
@@ -146,7 +163,15 @@ class TestAutosummaryDocumenter(unittest.TestCase):
         self.assertIn('<span class="pre">small_data</span>', html)
 
         self.assertNotIn('Should be skipped', html)
-        self.assertIn('Should be included', html)
+        try:
+            self.assertIn('Should be included', html)
+        except AssertionError: # sphinx>=3.5
+            self.assertIn(
+                '<span class="pre">\'Should</span> '
+                '<span class="pre">be</span> '
+                '<span class="pre">included\'</span>',
+                html
+            )
 
         self.assertIn('DummySection', html)
         self.assertTrue(in_between(
