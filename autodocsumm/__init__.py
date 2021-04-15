@@ -250,6 +250,8 @@ class AutosummaryDocumenter(object):
                 self.add_line('', sourcename)
 
                 self.add_line('.. autosummary::', sourcename)
+                if self.options.autosummary_nosignatures:
+                    self.add_line('    :nosignatures:', sourcename)
                 self.add_line('', sourcename)
                 indent = '    '
 
@@ -280,6 +282,7 @@ class AutoSummModuleDocumenter(ModuleDocumenter, AutosummaryDocumenter):
     option_spec['autosummary-sections'] = list_option
     option_spec['autosummary-no-titles'] = bool_option
     option_spec['autosummary-force-inline'] = bool_option
+    option_spec['autosummary-nosignatures'] = bool_option
 
     #: Add options for members for the autosummary
     for _option in member_options.intersection(option_spec):
@@ -329,6 +332,7 @@ class AutoSummClassDocumenter(ClassDocumenter, AutosummaryDocumenter):
     option_spec['autosummary-sections'] = list_option
     option_spec['autosummary-no-titles'] = bool_option
     option_spec['autosummary-force-inline'] = bool_option
+    option_spec['autosummary-nosignatures'] = bool_option
 
     #: Add options for members for the autosummary
     for _option in member_options.intersection(option_spec):

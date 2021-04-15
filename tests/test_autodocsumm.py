@@ -186,6 +186,22 @@ class TestAutosummaryDocumenter(unittest.TestCase):
             self.assertNotIn('Should also be skipped', html)
 
     @with_app(buildername='html', srcdir=sphinx_supp,
+        copy_srcdir_to_tmpdir=True)
+    def test_module_nosignatures(self, app, status, warning):
+        app.build()
+
+        html = get_html(app, 'test_module_nosignatures.html')
+        self.assertIn('<span class="pre">TestClass</span>', html)
+        self.assertIn('<span class="pre">test_func</span>', html)
+
+        # test whether the data is shown correctly
+        self.assertIn('<span class="pre">large_data</span>', html)
+        self.assertIn('<span class="pre">small_data</span>', html)
+
+        self.assertNotIn('<dt id="dummy.Class_CallTest">', html)
+        self.assertNotIn('()', html)
+
+    @with_app(buildername='html', srcdir=sphinx_supp,
               copy_srcdir_to_tmpdir=True)
     def test_class(self, app, status, warning):
         app.build()
@@ -292,6 +308,34 @@ class TestAutosummaryDocumenter(unittest.TestCase):
         self.assertNotIn('<dt id="dummy.TestClass.small_data">', html)
 
     @with_app(buildername='html', srcdir=sphinx_supp,
+        copy_srcdir_to_tmpdir=True)
+    def test_class_nosignatures(self, app, status, warning):
+        app.build()
+        html = get_html(app, '/test_class_nosignatures.html')
+
+        if sphinx_version[:2] > [3, 1]:
+            self.assertIn(
+                '<span class="pre">instance_attribute</span>',
+                html)
+        elif sphinx_version[:2] < [3, 1]:
+            self.assertIn(
+                '<span class="pre">dummy.TestClass.instance_attribute</span>',
+                html)
+
+        self.assertIn('<span class="pre">test_method</span>', html)
+        self.assertIn('<span class="pre">test_attr</span>', html)
+
+        # test whether the right objects are included
+        self.assertIn('<span class="pre">class_caller</span>', html)
+
+        # test whether the data is shown correctly
+        self.assertIn('<span class="pre">large_data</span>', html)
+        self.assertIn('<span class="pre">small_data</span>', html)
+
+        self.assertNotIn('<dt id="dummy.TestClass.small_data">', html)
+        self.assertNotIn('()', html)
+
+    @with_app(buildername='html', srcdir=sphinx_supp,
               copy_srcdir_to_tmpdir=True)
     def test_inherited(self, app, status, warning):
         app.build()
@@ -382,6 +426,23 @@ class TestAutoDocSummDirective(unittest.TestCase):
         self.assertIn('<span class="pre">test_attr</span>', html)
 
     @with_app(buildername='html', srcdir=sphinx_supp,
+        copy_srcdir_to_tmpdir=True)
+    def test_autoclasssumm_nosignatures(self, app, status, warning):
+        """Test building the autosummary of a class without signatures."""
+        app.build()
+
+        html = get_html(app, '/test_autoclasssumm_nosignatures.html')
+
+        # the class docstring must not be in the html
+        self.assertNotIn("Class test for autosummary", html)
+
+        # test if the methods and attributes are there in a table
+        self.assertIn('<span class="pre">test_method</span>', html)
+        self.assertIn('<span class="pre">test_attr</span>', html)
+
+        self.assertNotIn('()', html)
+
+    @with_app(buildername='html', srcdir=sphinx_supp,
               copy_srcdir_to_tmpdir=True)
     def test_automodulesumm(self, app, status, warning):
         """Test building the autosummary of a module."""
@@ -412,6 +473,24 @@ class TestAutoDocSummDirective(unittest.TestCase):
         self.assertNotIn('<span class="pre">Class_CallTest</span>', html)
         self.assertIn('<span class="pre">large_data</span>', html)
         self.assertIn('<span class="pre">test_func</span>', html)
+
+    @with_app(buildername='html', srcdir=sphinx_supp,
+        copy_srcdir_to_tmpdir=True)
+    def test_automodulesumm_nosignatures(self, app, status, warning):
+        """Test building the autosummary of a module without signatures."""
+        app.build()
+
+        html = get_html(app, '/test_automodulesumm_nosignatures.html')
+
+        # the class docstring must not be in the html
+        self.assertNotIn("Module for testing the autodocsumm", html)
+
+        # test if the classes, data and functions are there in a table
+        self.assertIn('<span class="pre">Class_CallTest</span>', html)
+        self.assertIn('<span class="pre">large_data</span>', html)
+        self.assertIn('<span class="pre">test_func</span>', html)
+
+        self.assertNotIn('()', html)
 
     @with_app(buildername='html', srcdir=sphinx_supp,
               copy_srcdir_to_tmpdir=True)

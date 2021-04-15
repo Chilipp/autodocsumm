@@ -56,6 +56,8 @@ autosummary table (see the example in :ref:`summary-table-example`).
 ``autosummary-force-inline``
     Force adding the autosummary, even it is already contained in the class
     or module docstring. See the example about :ref:`autosummary-position-example`
+``autosummary-nosignatures``
+    Do not show function signatures in the summary table.
 
 
 .. _directives:
