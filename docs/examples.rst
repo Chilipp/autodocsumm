@@ -140,6 +140,29 @@ which gives us
     :autosummary-no-nesting:
 
 
+.. _nosignatures-example:
+
+Generating a summary table without signatures
+---------------------------------------------
+
+Using the ``autosummary-nosignatures`` option, you can generate the
+autosummary table for a module that will not include function signatures.
+This is useful for giving a high-level overview of the function name and
+description. For the :doc:`demo module <demo_module>`, here's an example::
+
+    .. automodule:: dummy
+        :members:
+        :autosummary:
+        :autosummary-nosignatures:
+
+which gives us
+
+.. automodule:: dummy
+    :members:
+    :autosummary:
+    :autosummary-nosignatures:
+
+
 .. _select-sections-example:
 
 Select the sections to document
