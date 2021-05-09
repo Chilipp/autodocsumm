@@ -30,7 +30,7 @@ jobs:
         SPHINX_VERSION: ${{ matrix.sphinx-version }}
       run: |
         python -m pip install --upgrade pip
-        SPHINX=sphinx
+        SPHINX=Sphinx
         if [[ $SPHINX_VERSION != "" ]]; then
           SPHINX="${SPHINX}==${SPHINX_VERSION}";
         fi
