@@ -56,7 +56,7 @@ except ImportError:
     except ImportError:
         from ordereddict import OrderedDict
 
-__version__ = '0.2.3'
+__version__ = '0.2.4'
 
 __author__ = "Philipp S. Sommer"
 
