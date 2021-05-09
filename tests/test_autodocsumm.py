@@ -115,7 +115,10 @@ class TestAutosummaryDocumenter(unittest.TestCase):
             )
 
         # test the members are still displayed
-        self.assertIn('<dt id="dummy.Class_CallTest">', html)
+        self.assertRegexpMatches(
+            html,
+            r'<dt( class=".*")? id="dummy.Class_CallTest"( class=".*")*>'
+        )
 
     @with_app(buildername='html', srcdir=sphinx_supp,
               copy_srcdir_to_tmpdir=True)
@@ -129,7 +132,10 @@ class TestAutosummaryDocumenter(unittest.TestCase):
         self.assertIn('<span class="pre">large_data</span>', html)
         self.assertIn('<span class="pre">small_data</span>', html)
 
-        self.assertNotIn('<dt id="dummy.Class_CallTest">', html)
+        self.assertNotRegexpMatches(
+            html,
+            r'<dt( class=".*")? id="dummy.Class_CallTest"( class=".*")*>'
+        )
 
     @with_app(buildername='html', srcdir=sphinx_supp,
               copy_srcdir_to_tmpdir=True)
@@ -198,7 +204,10 @@ class TestAutosummaryDocumenter(unittest.TestCase):
         self.assertIn('<span class="pre">large_data</span>', html)
         self.assertIn('<span class="pre">small_data</span>', html)
 
-        self.assertNotIn('<dt id="dummy.Class_CallTest">', html)
+        self.assertNotRegexpMatches(
+            html,
+            r'<dt( class=".*")? id="dummy.Class_CallTest"( class=".*")*>'
+        )
         self.assertNotIn('()', html)
 
     @with_app(buildername='html', srcdir=sphinx_supp,
@@ -305,7 +314,10 @@ class TestAutosummaryDocumenter(unittest.TestCase):
         self.assertIn('<span class="pre">large_data</span>', html)
         self.assertIn('<span class="pre">small_data</span>', html)
 
-        self.assertNotIn('<dt id="dummy.TestClass.small_data">', html)
+        self.assertNotRegexpMatches(
+            html,
+            r'<dt( class=".*")? id="dummy.TestClass.small_data"( class=".*")*>'
+        )
 
     @with_app(buildername='html', srcdir=sphinx_supp,
         copy_srcdir_to_tmpdir=True)
@@ -332,7 +344,11 @@ class TestAutosummaryDocumenter(unittest.TestCase):
         self.assertIn('<span class="pre">large_data</span>', html)
         self.assertIn('<span class="pre">small_data</span>', html)
 
-        self.assertNotIn('<dt id="dummy.TestClass.small_data">', html)
+        self.assertNotRegexpMatches(
+            html,
+            r'<dt( class=".*")? id="dummy.TestClass.small_data"( class=".*")*>'
+        )
+
         self.assertNotIn('()', html)
 
     @with_app(buildername='html', srcdir=sphinx_supp,

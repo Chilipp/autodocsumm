@@ -40,7 +40,12 @@ except ImportError:
 
 sphinx_version = list(map(float, re.findall(r'\d+', sphinx.__version__)[:3]))
 
-from sphinx.util import force_decode
+try:
+    from sphinx.util import force_decode
+except ImportError:
+    # force_decode has been removed with sphinx 4.0
+    def force_decode(string: str, encoding: str) -> str:
+        return string
 
 
 try:
@@ -87,6 +92,15 @@ def list_option(option):
 
 def bool_option(*args):
     return "True"
+
+
+def _get_arg(param, pos, default, *args, **kwargs):
+    if param in kwargs:
+        return kwargs[param]
+    elif len(args) > pos:
+        return args[pos]
+    else:
+        return default
 
 
 class AutosummaryDocumenter(object):
@@ -369,13 +383,14 @@ class CallableDataDocumenter(DataDocumenter):
             return None
         return process_signature(callmeth)
 
-    def get_doc(self, encoding=None, ignore=1):
+    def get_doc(self, *args, **kwargs):
         """Reimplemented  to include data from the call method"""
         content = self.env.config.autodata_content
         if content not in ('both', 'call') or not self.get_attr(
                 self.get_attr(self.object, '__call__', None), '__doc__'):
             return super(CallableDataDocumenter, self).get_doc(
-                encoding=encoding, ignore=ignore)
+                *args, **kwargs
+            )
 
         # for classes, what the "docstring" is can be controlled via a
         # config value; the default is both docstrings
@@ -413,13 +428,14 @@ class CallableAttributeDocumenter(AttributeDocumenter):
             return None
         return process_signature(callmeth)
 
-    def get_doc(self, encoding=None, ignore=1):
+    def get_doc(self, *args, **kwargs):
         """Reimplemented  to include data from the call method"""
         content = self.env.config.autodata_content
         if content not in ('both', 'call') or not self.get_attr(
                 self.get_attr(self.object, '__call__', None), '__doc__'):
             return super(CallableAttributeDocumenter, self).get_doc(
-                encoding=encoding, ignore=ignore)
+                *args, **kwargs
+            )
 
         # for classes, what the "docstring" is can be controlled via a
         # config value; the default is both docstrings
@@ -435,10 +451,17 @@ class CallableAttributeDocumenter(AttributeDocumenter):
             docstrings.append(calldocstring + '\n')
 
         doc = []
-        for docstring in docstrings:
-            if not isinstance(docstring, str):
-                docstring = force_decode(docstring, encoding)
-            doc.append(prepare_docstring(docstring, ignore))
+        if sphinx_version < [4, 0]:
+            encoding = _get_arg("encoding", 0, None, *args, **kwargs)
+            ignore = _get_arg("ignore", 1, 1, *args, **kwargs)
+            for docstring in docstrings:
+                if not isinstance(docstring, str):
+                    docstring = force_decode(docstring, encoding)
+                doc.append(prepare_docstring(docstring, ignore))
+        else:
+            ignore = _get_arg("ignore", 0, 1, *args, **kwargs)
+            for docstring in docstrings:
+                doc.append(prepare_docstring(docstring, ignore))
 
         return doc
 
