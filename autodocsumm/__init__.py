@@ -31,8 +31,6 @@ from sphinx.ext.autodoc.directive import (
     DocumenterBridge
 )
 
-from sphinx.ext.autodoc import get_documenters
-
 try:
     from sphinx.util.inspect import signature, stringify_signature
 except ImportError:
@@ -199,7 +197,7 @@ class AutosummaryDocumenter(object):
 
         # document non-skipped members
         memberdocumenters = []
-        registry = get_documenters(self.env.app)
+        registry = self.env.app.registry.documenters
 
         for (mname, member, isattr) in self.filter_members(members, want_all):
             classes = [cls for cls in registry.values()
@@ -604,7 +602,7 @@ def setup(app):
          if option not in AUTODOC_DEFAULT_OPTIONS])
 
     # make sure to allow inheritance when registering new documenters
-    registry = get_documenters(app)
+    registry = app.registry.documenters
     for cls in [AutoSummClassDocumenter, AutoSummModuleDocumenter,
                 CallableAttributeDocumenter, NoDataDataDocumenter,
                 NoDataAttributeDocumenter]:
