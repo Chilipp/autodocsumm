@@ -181,6 +181,10 @@ class AutosummaryDocumenter(object):
         self.real_modname = None or self.get_real_modname()
 
         # try to also get a source code analyzer for attribute docs
+        if sphinx_version < [4, 0]:
+            record_dependencies = self.directive.filename_set
+        else:
+            record_dependencies = self.directive.record_dependencies
         try:
             self.analyzer = ModuleAnalyzer.for_module(self.real_modname)
             # parse right now, to get PycodeErrors on parsing (results will
@@ -192,9 +196,9 @@ class AutosummaryDocumenter(object):
             self.analyzer = None
             # at least add the module.__file__ as a dependency
             if hasattr(self.module, '__file__') and self.module.__file__:
-                self.directive.filename_set.add(self.module.__file__)
+                record_dependencies.add(self.module.__file__)
         else:
-            self.directive.filename_set.add(self.analyzer.srcname)
+            record_dependencies.add(self.analyzer.srcname)
 
         self.env.temp_data['autodoc:module'] = self.modname
         if self.objpath:
@@ -487,9 +491,8 @@ class CallableAttributeDocumenter(AttributeDocumenter):
                     docstring = force_decode(docstring, encoding)
                 doc.append(prepare_docstring(docstring, ignore))
         else:
-            ignore = _get_arg("ignore", 0, 1, *args, **kwargs)
             for docstring in docstrings:
-                doc.append(prepare_docstring(docstring, ignore))
+                doc.append(prepare_docstring(docstring))
 
         return doc
 
