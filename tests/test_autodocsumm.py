@@ -162,7 +162,7 @@ class TestAutosummaryDocumenter:
             assert (
                 '<span class="pre">\'Should</span> '
                 '<span class="pre">be</span> '
-                '<span class="pre">skipped\'</span>',
+                '<span class="pre">skipped\'</span>'
             ) not in html
         else:
             assert 'Should be skipped' not in html
@@ -173,13 +173,13 @@ class TestAutosummaryDocumenter:
                 '<span class="pre">\'Should</span> '
                 '<span class="pre">also</span> '
                 '<span class="pre">be</span> '
-                '<span class="pre">included\'</span>',
+                '<span class="pre">included\'</span>'
             ) in html
             assert (
                 '<span class="pre">\'Should</span> '
                 '<span class="pre">also</span> '
                 '<span class="pre">be</span> '
-                '<span class="pre">skipped\'</span>',
+                '<span class="pre">skipped\'</span>'
             ) not in html
         else:
             assert 'Should also be skipped' not in html
@@ -237,7 +237,7 @@ class TestAutosummaryDocumenter:
             assert (
                 '<span class="pre">\'Should</span> '
                 '<span class="pre">be</span> '
-                '<span class="pre">included\'</span>',
+                '<span class="pre">included\'</span>'
             ) in html
 
         assert 'DummySection' in html
