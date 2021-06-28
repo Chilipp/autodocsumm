@@ -71,9 +71,9 @@ Directives
     use the same options as for the ``autoclass`` directive. You can select a
     specific section and omit the title via::
 
-    .. autoclasssumm:: MyClass
-        :autosummary-sections: Methods
-        :autosummary-no-titles:
+        .. autoclasssumm:: MyClass
+            :autosummary-sections: Methods
+            :autosummary-no-titles:
 
     By default, this directives also sets the `:members:` option unless you
     specify `:no-members`.

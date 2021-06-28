@@ -11,7 +11,7 @@ def readme():
 
 
 setup(name='autodocsumm',
-      version='0.2.5',
+      version='0.2.6',
       description='Extended sphinx autodoc including automatic autosummaries',
       long_description=readme(),
       long_description_content_type='text/x-rst',
@@ -19,7 +19,7 @@ setup(name='autodocsumm',
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         'Topic :: Documentation',
-        'License :: OSI Approved :: GNU General Public License v2 (GPLv2)',
+        'License :: OSI Approved :: Apache Software License',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3 :: Only',
         'Programming Language :: Python :: 3.5',

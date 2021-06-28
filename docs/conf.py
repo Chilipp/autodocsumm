@@ -69,9 +69,9 @@ not_document_data = ['no_data_demo.d']
 add_module_names = False
 
 # General information about the project.
-project = u'autodocsumm'
-copyright = u'2015, Philipp Sommer'
-author = u'Philipp Sommer'
+project = 'autodocsumm'
+copyright = '2016-2019, Philipp S. Sommer; 2020-2021, Helmholtz-Zentrum Hereon'
+author = 'Philipp S. Sommer'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -136,11 +136,6 @@ if not on_rtd:  # only import and set the theme if we're building docs locally
     import sphinx_rtd_theme
     html_theme = 'sphinx_rtd_theme'
     html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
-
-    # Add any paths that contain custom static files (such as style sheets) here,
-    # relative to this directory. They are copied after the builtin static files,
-    # so a file named "default.css" will overwrite the builtin "default.css".
-    html_static_path = ['_static']
 
 # otherwise, readthedocs.org uses their theme by default, so no need to specify
 
@@ -385,12 +380,9 @@ epub_exclude_files = ['search.html']
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {
-    'sphinx': ('http://www.sphinx-doc.org/en/master/', None),
+    'sphinx': ('https://www.sphinx-doc.org/en/master/', None),
+    'python': ('https://docs.python.org/3.9/', None),
 }
-if six.PY3:
-    intersphinx_mapping['python'] = ('https://docs.python.org/3.7/', None)
-else:
-    intersphinx_mapping['python'] = ('https://docs.python.org/2.7/', None)
 
 
 def example_grouper(app, what, name, obj, section, parent):
