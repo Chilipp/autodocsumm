@@ -38,6 +38,8 @@ __email__ = "philipp.sommer@hereon.de"
 
 __status__ = "Production"
 
+__version__ = '0.2.5'
+
 from itertools import chain
 
 from sphinx.util import logging
@@ -85,9 +87,6 @@ except ImportError:
     except ImportError:
         from ordereddict import OrderedDict
 
-__version__ = '0.2.4'
-
-__author__ = "Philipp S. Sommer"
 
 logger = logging.getLogger(__name__)
 
