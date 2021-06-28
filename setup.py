@@ -36,7 +36,7 @@ setup(name='autodocsumm',
       license="Apache-2.0",
       packages=find_packages(exclude=['docs', 'tests*', 'examples']),
       install_requires=[
-          'Sphinx>=2.2.*',
+          'Sphinx>=2.2',
       ],
       setup_requires=pytest_runner,
       tests_require=['pytest', 'sphinx-testing'],
