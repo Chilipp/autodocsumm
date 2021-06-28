@@ -17,21 +17,12 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-import sys
 import re
-import os.path as osp
-import unittest
-from sphinx_testing import with_app
+import pytest
 import sphinx
 
 
 from autodocsumm import sphinx_version
-
-
-sphinx_supp = osp.abspath(osp.join(osp.dirname(__file__), 'sphinx_supp'))
-
-
-sys.path.insert(0, sphinx_supp)
 
 
 def in_between(full, sub, s0, *others):
@@ -48,350 +39,313 @@ def get_html(app, fname):
         return f.read()
 
 
-class TestAutosummaryDocumenter(unittest.TestCase):
-
-    @with_app(buildername='html', srcdir=sphinx_supp,
-              copy_srcdir_to_tmpdir=True)
-    def test_module(self, app, status, warning):
+class TestAutosummaryDocumenter:
+    def test_module(self, app):
         app.build()
         html = get_html(app, 'test_module.html')
-        self.assertIn('<span class="pre">TestClass</span>', html)
-        self.assertIn('<span class="pre">test_func</span>', html)
-        self.assertIn('<span class="pre">test_method</span>', html)
-        self.assertIn('<span class="pre">test_attr</span>', html)
+        assert '<span class="pre">TestClass</span>' in html
+        assert '<span class="pre">test_func</span>' in html
+        assert '<span class="pre">test_method</span>' in html
+        assert '<span class="pre">test_attr</span>' in html
 
         # test whether the right objects are included
-        self.assertIn('<span class="pre">class_caller</span>', html)
-        self.assertIn('Caller docstring for class attribute', html)
+        assert '<span class="pre">class_caller</span>' in html
+        assert 'Caller docstring for class attribute' in html
 
         # test whether the data is shown correctly
-        self.assertIn('<span class="pre">large_data</span>', html)
-        self.assertIn('<span class="pre">small_data</span>', html)
+        assert '<span class="pre">large_data</span>' in html
+        assert '<span class="pre">small_data</span>' in html
 
         try:
-            self.assertIn('Should be included', html)
+            assert 'Should be included' in html
         except AssertionError: # sphinx>=3.5
-            self.assertIn(
+            assert (
                 '<span class="pre">\'Should</span> '
                 '<span class="pre">be</span> '
-                '<span class="pre">included\'</span>',
-                html
-            )
-            self.assertNotIn(
+                '<span class="pre">included\'</span>'
+            ) in html
+            assert (
                 '<span class="pre">\'Should</span> '
                 '<span class="pre">be</span> '
-                '<span class="pre">skipped\'</span>',
-                html
-            )
+                '<span class="pre">skipped\'</span>'
+            ) not in html
         else:
-            self.assertNotIn('Should be skipped', html)
+            assert 'Should be skipped' not in html
 
         try:
-            self.assertIn('Should also be included', html)
+            assert 'Should also be included' in html
         except AssertionError: # sphinx>=3.5
-            self.assertIn(
+            assert (
                 '<span class="pre">\'Should</span> '
                 '<span class="pre">also</span> '
                 '<span class="pre">be</span> '
-                '<span class="pre">included\'</span>',
-                html
-            )
-            self.assertNotIn(
+                '<span class="pre">included\'</span>'
+            ) in html
+            assert (
                 '<span class="pre">\'Should</span> '
                 '<span class="pre">also</span> '
                 '<span class="pre">be</span> '
-                '<span class="pre">skipped\'</span>',
-                html
-            )
+                '<span class="pre">skipped\'</span>'
+            ) not in html
         else:
-            self.assertNotIn('Should also be skipped', html)
+            assert 'Should also be skipped' not in html
 
-    @with_app(buildername='html', srcdir=sphinx_supp,
-              copy_srcdir_to_tmpdir=True)
-    def test_module_no_nesting(self, app, status, warning):
+    def test_module_no_nesting(self, app):
         app.build()
         html = get_html(app, 'test_module_no_nesting.html')
 
-        self.assertIn('<span class="pre">TestClass</span>', html)
-        self.assertIn('<span class="pre">test_func</span>', html)
+        assert '<span class="pre">TestClass</span>' in html
+        assert '<span class="pre">test_func</span>' in html
 
         # test whether the data is shown correctly
-        self.assertIn('<span class="pre">large_data</span>', html)
-        self.assertIn('<span class="pre">small_data</span>', html)
+        assert '<span class="pre">large_data</span>' in html
+        assert '<span class="pre">small_data</span>' in html
 
         # test that elements of TestClass are not autosummarized, since nesting is disabled.
         try:
-            self.assertNotIn('<span class="pre">test_method</span>', html)
-            self.assertNotIn('<span class="pre">test_attr</span>', html)
+            assert '<span class="pre">test_method</span>' not in html
+            assert '<span class="pre">test_attr</span>' not in html
         except AssertionError:  # sphinx>=3.5
-            self.assertEqual(
-                len(re.findall('<span class="pre">test_method</span>', html)),
-                1,
+            found_methods = re.findall(
+                '<span class="pre">test_method</span>', html
             )
-            self.assertEqual(
-                len(re.findall('<span class="pre">test_attr</span>', html)),
-                1,
+            assert len(found_methods) == 1
+            found_attrs = re.findall(
+                '<span class="pre">test_attr</span>', html
             )
+            assert len(found_attrs) == 1
 
         # test the members are still displayed
-        self.assertRegexpMatches(
+        assert re.search(
+            r'<dt( class=".*")? id="dummy.Class_CallTest"( class=".*")*>',
             html,
-            r'<dt( class=".*")? id="dummy.Class_CallTest"( class=".*")*>'
         )
 
-    @with_app(buildername='html', srcdir=sphinx_supp,
-              copy_srcdir_to_tmpdir=True)
-    def test_module_summary_only(self, app, status, warning):
+    def test_module_summary_only(self, app):
         app.build()
         html = get_html(app, 'test_module_summary_only.html')
-        self.assertIn('<span class="pre">TestClass</span>', html)
-        self.assertIn('<span class="pre">test_func</span>', html)
+        assert '<span class="pre">TestClass</span>' in html
+        assert '<span class="pre">test_func</span>' in html
 
         # test whether the data is shown correctly
-        self.assertIn('<span class="pre">large_data</span>', html)
-        self.assertIn('<span class="pre">small_data</span>', html)
+        assert '<span class="pre">large_data</span>' in html
+        assert '<span class="pre">small_data</span>' in html
 
-        self.assertNotRegexpMatches(
+        assert not re.search(
+            r'<dt( class=".*")? id="dummy.Class_CallTest"( class=".*")*>',
             html,
-            r'<dt( class=".*")? id="dummy.Class_CallTest"( class=".*")*>'
         )
 
-    @with_app(buildername='html', srcdir=sphinx_supp,
-              copy_srcdir_to_tmpdir=True)
-    def test_module_with_title(self, app, status, warning):
+    def test_module_with_title(self, app):
         app.build()
         html = get_html(app, 'test_module_title.html')
-        self.assertIn('<span class="pre">TestClass</span>', html)
-        self.assertIn('<span class="pre">test_func</span>', html)
-        self.assertIn('<span class="pre">test_method</span>', html)
-        self.assertIn('<span class="pre">test_attr</span>', html)
+        assert '<span class="pre">TestClass</span>' in html
+        assert '<span class="pre">test_func</span>' in html
+        assert '<span class="pre">test_method</span>' in html
+        assert '<span class="pre">test_attr</span>' in html
 
         # test whether the right objects are included
-        self.assertIn('<span class="pre">class_caller</span>', html)
-        self.assertIn('Caller docstring for class attribute', html)
+        assert '<span class="pre">class_caller</span>' in html
+        assert 'Caller docstring for class attribute' in html
 
         # test whether the data is shown correctly
-        self.assertIn('<span class="pre">large_data</span>', html)
-        self.assertIn('<span class="pre">small_data</span>', html)
+        assert '<span class="pre">large_data</span>' in html
+        assert '<span class="pre">small_data</span>' in html
         try:
-            self.assertIn('Should be included', html)
+            assert 'Should be included' in  html
         except AssertionError: # sphinx>=3.5
-            self.assertIn(
+            assert (
                 '<span class="pre">\'Should</span> '
                 '<span class="pre">be</span> '
-                '<span class="pre">included\'</span>',
-                html
-            )
-            self.assertNotIn(
+                '<span class="pre">included\'</span>'
+            ) in html
+            assert (
                 '<span class="pre">\'Should</span> '
                 '<span class="pre">be</span> '
                 '<span class="pre">skipped\'</span>',
-                html
-            )
+            ) not in html
         else:
-            self.assertNotIn('Should be skipped', html)
+            assert 'Should be skipped' not in html
         try:
-            self.assertIn('Should also be included', html)
+            assert 'Should also be included' in html
         except AssertionError: # sphinx>=3.5
-            self.assertIn(
+            assert (
                 '<span class="pre">\'Should</span> '
                 '<span class="pre">also</span> '
                 '<span class="pre">be</span> '
                 '<span class="pre">included\'</span>',
-                html
-            )
-            self.assertNotIn(
+            ) in html
+            assert (
                 '<span class="pre">\'Should</span> '
                 '<span class="pre">also</span> '
                 '<span class="pre">be</span> '
                 '<span class="pre">skipped\'</span>',
-                html
-            )
+            ) not in html
         else:
-            self.assertNotIn('Should also be skipped', html)
+            assert 'Should also be skipped' not in html
 
-    @with_app(buildername='html', srcdir=sphinx_supp,
-        copy_srcdir_to_tmpdir=True)
-    def test_module_nosignatures(self, app, status, warning):
+    def test_module_nosignatures(self, app):
         app.build()
 
         html = get_html(app, 'test_module_nosignatures.html')
-        self.assertIn('<span class="pre">TestClass</span>', html)
-        self.assertIn('<span class="pre">test_func</span>', html)
+        assert '<span class="pre">TestClass</span>' in html
+        assert '<span class="pre">test_func</span>' in html
 
         # test whether the data is shown correctly
-        self.assertIn('<span class="pre">large_data</span>', html)
-        self.assertIn('<span class="pre">small_data</span>', html)
+        assert '<span class="pre">large_data</span>' in html
+        assert '<span class="pre">small_data</span>' in html
 
-        self.assertNotRegexpMatches(
+        assert not re.search(
+            r'<dt( class=".*")? id="dummy.Class_CallTest"( class=".*")*>',
             html,
-            r'<dt( class=".*")? id="dummy.Class_CallTest"( class=".*")*>'
         )
-        self.assertNotIn('()', html)
+        assert '()' not in html
 
-    @with_app(buildername='html', srcdir=sphinx_supp,
-              copy_srcdir_to_tmpdir=True)
-    def test_class(self, app, status, warning):
+    def test_class(self, app):
         app.build()
         html = get_html(app, '/test_class.html')
 
         if sphinx_version[:2] > [3, 1]:
-            self.assertIn(
-                '<span class="pre">instance_attribute</span>',
-                html)
+            assert '<span class="pre">instance_attribute</span>' in html
         elif sphinx_version[:2] < [3, 1]:
-            self.assertIn(
-                '<span class="pre">dummy.TestClass.instance_attribute</span>',
-                html)
+            assert (
+                '<span class="pre">dummy.TestClass.instance_attribute</span>'
+                in html
+            )
 
-        self.assertIn('<span class="pre">test_method</span>', html)
-        self.assertIn('<span class="pre">test_attr</span>', html)
+        assert '<span class="pre">test_method</span>' in html
+        assert '<span class="pre">test_attr</span>' in html
 
         # test escaping of *
-        self.assertNotIn(r'\*args', html)
-        self.assertNotIn(r', \*\*kwargs', html)
-        self.assertIn('*args', html)
-        self.assertIn('**kwargs', html)
+        assert r'\*args' not in html
+        assert r', \*\*kwargs' not in html
+        assert '*args' in html
+        assert '**kwargs' in html
 
         # test whether the right objects are included
-        self.assertIn('<span class="pre">class_caller</span>', html)
-        self.assertIn('Caller docstring for class attribute', html)
+        assert '<span class="pre">class_caller</span>' in html
+        assert 'Caller docstring for class attribute' in html
 
         # test whether the data is shown correctly
-        self.assertIn('<span class="pre">large_data</span>', html)
-        self.assertIn('<span class="pre">small_data</span>', html)
+        assert '<span class="pre">large_data</span>' in html
+        assert '<span class="pre">small_data</span>' in html
 
-        self.assertNotIn('Should be skipped', html)
+        assert 'Should be skipped' not in html
         try:
-            self.assertIn('Should be included', html)
+            assert 'Should be included' in html
         except AssertionError: # sphinx>=3.5
-            self.assertIn(
+            assert (
                 '<span class="pre">\'Should</span> '
                 '<span class="pre">be</span> '
                 '<span class="pre">included\'</span>',
-                html
-            )
+            ) in html
 
-        self.assertIn('DummySection', html)
-        self.assertTrue(in_between(
+        assert 'DummySection' in html
+        assert in_between(
             html, '<span class="pre">class_caller</span>', 'DummySection',
-            'Attributes', 'Methods'),
-            msg='class_caller Attribute not in the right Section!')
+            'Attributes', 'Methods'
+        ), 'class_caller Attribute not in the right Section!'
 
         # check if the InnerClass is in the Classes section (which ends with
         # the DummySection)
-        self.assertTrue(in_between(
+        assert in_between(
             html, '<span class="pre">InnerClass</span>', 'Classes',
-            'DummySection'))
+            'DummySection'
+        )
 
-    @with_app(buildername='html', srcdir=sphinx_supp,
-              copy_srcdir_to_tmpdir=True)
-    @unittest.skipIf(
-        sphinx_version[:2] < [3, 1], "Only available for sphinx>=3"
+    @pytest.mark.skipif(
+        sphinx_version[:2] < [3, 1], reason="Only available for sphinx>=3"
     )
-    def test_class_order(self, app, status, warning):
+    def test_class_order(self, app):
         app.build()
         html = get_html(app, '/test_class_order.html')
 
         if sphinx_version[:2] > [3, 1]:
-            self.assertIn(
-                '<span class="pre">instance_attribute</span>',
-                html)
+            assert '<span class="pre">instance_attribute</span>' in html
         elif sphinx_version[:2] < [3, 1]:
-            self.assertIn(
-                '<span class="pre">dummy.TestClass.instance_attribute</span>',
-                html)
+            assert (
+                '<span class="pre">dummy.TestClass.instance_attribute</span>'
+                in html
+            )
 
-        self.assertIn('<span class="pre">test_attr</span>', html)
-        self.assertIn('<span class="pre">large_data</span>', html)
+        assert '<span class="pre">test_attr</span>' in html
+        assert '<span class="pre">large_data</span>' in html
 
-        self.assertLess(html.index('<span class="pre">test_attr</span>'),
-                        html.index('<span class="pre">large_data</span>'))
+        assert (
+            html.index('<span class="pre">test_attr</span>')
+            < html.index('<span class="pre">large_data</span>')
+        )
 
-    @with_app(buildername='html', srcdir=sphinx_supp,
-              copy_srcdir_to_tmpdir=True)
-    def test_class_summary_only(self, app, status, warning):
+    def test_class_summary_only(self, app):
         app.build()
         html = get_html(app, '/test_class_summary_only.html')
 
         if sphinx_version[:2] > [3, 1]:
-            self.assertIn(
-                '<span class="pre">instance_attribute</span>',
-                html)
+            assert '<span class="pre">instance_attribute</span>' in html
         elif sphinx_version[:2] < [3, 1]:
-            self.assertIn(
-                '<span class="pre">dummy.TestClass.instance_attribute</span>',
-                html)
+            assert (
+                '<span class="pre">dummy.TestClass.instance_attribute</span>'
+                in html
+            )
 
-        self.assertIn('<span class="pre">test_method</span>', html)
-        self.assertIn('<span class="pre">test_attr</span>', html)
+        assert '<span class="pre">test_method</span>' in html
+        assert '<span class="pre">test_attr</span>' in html
 
         # test whether the right objects are included
-        self.assertIn('<span class="pre">class_caller</span>', html)
+        assert '<span class="pre">class_caller</span>' in html
 
         # test whether the data is shown correctly
-        self.assertIn('<span class="pre">large_data</span>', html)
-        self.assertIn('<span class="pre">small_data</span>', html)
+        assert '<span class="pre">large_data</span>' in html
+        assert '<span class="pre">small_data</span>' in html
 
-        self.assertNotRegexpMatches(
+        assert not re.search(
+            r'<dt( class=".*")? id="dummy.TestClass.small_data"( class=".*")*>',
             html,
-            r'<dt( class=".*")? id="dummy.TestClass.small_data"( class=".*")*>'
         )
 
-    @with_app(buildername='html', srcdir=sphinx_supp,
-        copy_srcdir_to_tmpdir=True)
-    def test_class_nosignatures(self, app, status, warning):
+    def test_class_nosignatures(self, app):
         app.build()
         html = get_html(app, '/test_class_nosignatures.html')
 
         if sphinx_version[:2] > [3, 1]:
-            self.assertIn(
-                '<span class="pre">instance_attribute</span>',
-                html)
+            assert '<span class="pre">instance_attribute</span>' in html
         elif sphinx_version[:2] < [3, 1]:
-            self.assertIn(
-                '<span class="pre">dummy.TestClass.instance_attribute</span>',
-                html)
+            assert (
+                '<span class="pre">dummy.TestClass.instance_attribute</span>'
+                in html
+            )
 
-        self.assertIn('<span class="pre">test_method</span>', html)
-        self.assertIn('<span class="pre">test_attr</span>', html)
+        assert '<span class="pre">test_method</span>' in html
+        assert '<span class="pre">test_attr</span>' in html
 
         # test whether the right objects are included
-        self.assertIn('<span class="pre">class_caller</span>', html)
+        assert '<span class="pre">class_caller</span>' in html
 
         # test whether the data is shown correctly
-        self.assertIn('<span class="pre">large_data</span>', html)
-        self.assertIn('<span class="pre">small_data</span>', html)
+        assert '<span class="pre">large_data</span>' in html
+        assert '<span class="pre">small_data</span>' in html
 
-        self.assertNotRegexpMatches(
+        assert not re.search(
+            r'<dt( class=".*")? id="dummy.TestClass.small_data"( class=".*")*>',
             html,
-            r'<dt( class=".*")? id="dummy.TestClass.small_data"( class=".*")*>'
         )
 
-        self.assertNotIn('()', html)
+        assert '()' not in html
 
-    @with_app(buildername='html', srcdir=sphinx_supp,
-              copy_srcdir_to_tmpdir=True)
-    def test_inherited(self, app, status, warning):
+    def test_inherited(self, app):
         app.build()
         html = get_html(app, '/test_inherited.html')
-        self.assertIn('<span class="pre">test_method</span>', html)
+        assert '<span class="pre">test_method</span>' in html
 
-    @with_app(buildername='html', srcdir=sphinx_supp,
-              copy_srcdir_to_tmpdir=True)
-    @unittest.skipIf(list(sys.version_info)[:2] <= [2, 7],
-                     "not implemented for python 2.7")
-    @unittest.skipIf(sphinx_version < [2, 0],
-                     "not a problem for sphinx 2.7")
-    @unittest.expectedFailure
-    def test_warnings_depreciation(self, app, status, warning):
-        with self.assertWarnsRegex(sphinx.deprecation.RemovedInSphinx40Warning,
-                                   r'(?s).*Autosummary.warnings'):
+    @pytest.mark.xfail
+    def test_warnings_depreciation(self, app):
+        with pytest.warns(
+            sphinx.deprecation.RemovedInSphinx40Warning,
+            r'(?s).*Autosummary.warnings',
+        ):
             app.build()
 
-    @with_app(buildername='html', srcdir=sphinx_supp,
-              copy_srcdir_to_tmpdir=True)
-    def test_autoclasssumm_inline(self, app, status, warning):
+    def test_autoclasssumm_inline(self, app):
         """Test an AutoDocSummDirective inline."""
         app.build()
 
@@ -401,141 +355,121 @@ class TestAutosummaryDocumenter(unittest.TestCase):
 
         num_section_findings = len(re.findall(methods_title, html))
 
-        self.assertEqual(num_section_findings, 1)
+        assert num_section_findings == 1
 
         methods_start = html.index(methods_title)
         docstring_end = html.index("This is after the summary")
 
-        self.assertGreater(docstring_end, methods_start)
+        assert docstring_end > methods_start
 
 
-class TestAutoDocSummDirective(unittest.TestCase):
+class TestAutoDocSummDirective:
     """Test case for the :class:`autodocsumm.AutoDocSummDirective`."""
 
-    @with_app(buildername='html', srcdir=sphinx_supp,
-              copy_srcdir_to_tmpdir=True)
-    def test_autoclasssumm(self, app, status, warning):
+    def test_autoclasssumm(self, app):
         """Test building the autosummary of a class."""
         app.build()
 
         html = get_html(app, '/test_autoclasssumm.html')
 
         # the class docstring must not be in the html
-        self.assertNotIn("Class test for autosummary", html)
+        assert "Class test for autosummary" not in html
 
         # test if the methods and attributes are there in a table
-        self.assertIn('<span class="pre">test_method</span>', html)
-        self.assertIn('<span class="pre">test_attr</span>', html)
+        assert '<span class="pre">test_method</span>' in html
+        assert '<span class="pre">test_attr</span>' in html
 
-    @with_app(buildername='html', srcdir=sphinx_supp,
-              copy_srcdir_to_tmpdir=True)
-    def test_autoclasssumm_no_titles(self, app, status, warning):
+    def test_autoclasssumm_no_titles(self, app):
         """Test building the autosummary of a class."""
         app.build()
 
         html = get_html(app, '/test_autoclasssumm_no_titles.html')
 
         # the class docstring must not be in the html
-        self.assertNotIn("Class test for autosummary", html)
+        assert "Class test for autosummary" not in html
 
         # test if the methods and attributes are there in a table
-        self.assertIn('<span class="pre">test_method</span>', html)
-        self.assertIn('<span class="pre">test_attr</span>', html)
+        assert '<span class="pre">test_method</span>' in html
+        assert '<span class="pre">test_attr</span>' in html
 
-        self.assertNotIn("<strong>Methods</strong>", html)
+        assert "<strong>Methods</strong>" not in html
 
-    @with_app(buildername='html', srcdir=sphinx_supp,
-              copy_srcdir_to_tmpdir=True)
-    def test_autoclasssumm_some_sections(self, app, status, warning):
+    def test_autoclasssumm_some_sections(self, app):
         """Test building the autosummary of a class with some sections only."""
         app.build()
 
         html = get_html(app, '/test_autoclasssumm_some_sections.html')
 
         # the class docstring must not be in the html
-        self.assertNotIn("Class test for autosummary", html)
+        assert "Class test for autosummary" not in html
 
         # test if the methods and attributes are there in a table
-        self.assertNotIn('<span class="pre">test_method</span>', html)
-        self.assertIn('<span class="pre">class_caller</span>', html)
-        self.assertIn('<span class="pre">test_attr</span>', html)
+        assert '<span class="pre">test_method</span>' not in html
+        assert '<span class="pre">class_caller</span>' in html
+        assert '<span class="pre">test_attr</span>' in html
 
-    @with_app(buildername='html', srcdir=sphinx_supp,
-        copy_srcdir_to_tmpdir=True)
-    def test_autoclasssumm_nosignatures(self, app, status, warning):
+    def test_autoclasssumm_nosignatures(self, app):
         """Test building the autosummary of a class without signatures."""
         app.build()
 
         html = get_html(app, '/test_autoclasssumm_nosignatures.html')
 
         # the class docstring must not be in the html
-        self.assertNotIn("Class test for autosummary", html)
+        assert "Class test for autosummary" not in html
 
         # test if the methods and attributes are there in a table
-        self.assertIn('<span class="pre">test_method</span>', html)
-        self.assertIn('<span class="pre">test_attr</span>', html)
+        assert '<span class="pre">test_method</span>' in html
+        assert '<span class="pre">test_attr</span>' in html
 
-        self.assertNotIn('()', html)
+        assert '()' not in html
 
-    @with_app(buildername='html', srcdir=sphinx_supp,
-              copy_srcdir_to_tmpdir=True)
-    def test_automodulesumm(self, app, status, warning):
+    def test_automodulesumm(self, app):
         """Test building the autosummary of a module."""
         app.build()
 
         html = get_html(app, '/test_automodulesumm.html')
 
         # the class docstring must not be in the html
-        self.assertNotIn("Module for testing the autodocsumm", html)
+        assert "Module for testing the autodocsumm" not in html
 
         # test if the classes, data and functions are there in a table
-        self.assertIn('<span class="pre">Class_CallTest</span>', html)
-        self.assertIn('<span class="pre">large_data</span>', html)
-        self.assertIn('<span class="pre">test_func</span>', html)
+        assert '<span class="pre">Class_CallTest</span>' in html
+        assert '<span class="pre">large_data</span>' in html
+        assert '<span class="pre">test_func</span>' in html
 
-    @with_app(buildername='html', srcdir=sphinx_supp,
-              copy_srcdir_to_tmpdir=True)
-    def test_automodulesumm_some_sections(self, app, status, warning):
+    def test_automodulesumm_some_sections(self, app):
         """Test building the autosummary of a module with some sections only."""
         app.build()
 
         html = get_html(app, '/test_automodulesumm_some_sections.html')
 
         # the class docstring must not be in the html
-        self.assertNotIn("Module for testing the autodocsumm", html)
+        assert "Module for testing the autodocsumm" not in html
 
         # test if the classes, data and functions are there in a table
-        self.assertNotIn('<span class="pre">Class_CallTest</span>', html)
-        self.assertIn('<span class="pre">large_data</span>', html)
-        self.assertIn('<span class="pre">test_func</span>', html)
+        assert '<span class="pre">Class_CallTest</span>' not in html
+        assert '<span class="pre">large_data</span>' in html
+        assert '<span class="pre">test_func</span>' in html
 
-    @with_app(buildername='html', srcdir=sphinx_supp,
-        copy_srcdir_to_tmpdir=True)
-    def test_automodulesumm_nosignatures(self, app, status, warning):
+    def test_automodulesumm_nosignatures(self, app):
         """Test building the autosummary of a module without signatures."""
         app.build()
 
         html = get_html(app, '/test_automodulesumm_nosignatures.html')
 
         # the class docstring must not be in the html
-        self.assertNotIn("Module for testing the autodocsumm", html)
+        assert "Module for testing the autodocsumm" not in html
 
         # test if the classes, data and functions are there in a table
-        self.assertIn('<span class="pre">Class_CallTest</span>', html)
-        self.assertIn('<span class="pre">large_data</span>', html)
-        self.assertIn('<span class="pre">test_func</span>', html)
+        assert '<span class="pre">Class_CallTest</span>' in html
+        assert '<span class="pre">large_data</span>' in html
+        assert '<span class="pre">test_func</span>' in html
 
-        self.assertNotIn('()', html)
+        assert '()' not in html
 
-    @with_app(buildername='html', srcdir=sphinx_supp,
-              copy_srcdir_to_tmpdir=True)
-    def test_empty(self, app, status, warning):
+    def test_empty(self, app):
         app.build()
 
         html = get_html(app, '/test_empty.html')
 
-        self.assertNotIn('<span class="pre">product</span>', html)
-
-
-if __name__ == '__main__':
-    unittest.main()
+        assert '<span class="pre">product</span>' not in html

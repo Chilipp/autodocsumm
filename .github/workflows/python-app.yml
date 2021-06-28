@@ -34,7 +34,7 @@ jobs:
         if [[ $SPHINX_VERSION != "" ]]; then
           SPHINX="${SPHINX}==${SPHINX_VERSION}";
         fi
-        pip install pytest pytest-cov codecov "${SPHINX}" sphinx-testing -e .
+        pip install pytest pytest-cov codecov "${SPHINX}" -e .
     - name: Test with pytest
       run: |
         pytest --cov=autodocsumm --cov-report=xml tests

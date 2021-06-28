@@ -39,5 +39,5 @@ setup(name='autodocsumm',
           'Sphinx>=2.2',
       ],
       setup_requires=pytest_runner,
-      tests_require=['pytest', 'sphinx-testing'],
+      tests_require=['pytest'],
       zip_safe=False)
