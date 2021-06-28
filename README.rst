@@ -128,6 +128,7 @@ directives by adding in ``conf.py``:
 Disclaimer
 ==========
 Copyright 2016-2019, Philipp S. Sommer
+
 Copyright 2020-2021, Helmholtz-Zentrum Hereon
 
 Licensed under the Apache License, Version 2.0 (the "License");
