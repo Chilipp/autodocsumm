@@ -90,7 +90,7 @@ The package only requires Sphinx_ to be installed. It has been tested for
 versions higher than 1.3.
 
 
-.. _Sphinx: http://www.sphinx-doc.org/en/stable
+.. _Sphinx: http://www.sphinx-doc.org/en/master
 
 
 Quickstart
