@@ -17,3 +17,5 @@ Example documentation
     test_automodulesumm
     test_automodulesumm_some_sections
     test_empty
+    test_class_submodule
+    test_module_submodule

@@ -366,6 +366,28 @@ class TestAutosummaryDocumenter:
 
         assert docstring_end > methods_start
 
+    def test_class_submodule(self, app):
+        app.build()
+
+        html = get_html(app, '/test_class_submodule.html')
+
+        # check that hyperlink for instance method exists in summary table
+        assert re.findall(r'<td>.*href="#dummy_submodule\.submodule1'
+                          r'\.SubmoduleClass1\.func1".*</td>', html)
+
+    def test_module_submodule(self, app):
+        app.build()
+
+        html = get_html(app, '/test_module_submodule.html')
+
+        # check that hyperlink for class exists in summary table
+        assert re.findall(r'<td>.*href="#dummy_submodule\.submodule2'
+                          r'\.SubmoduleClass2".*</td>', html)
+
+        # check that hyperlink for instance method exists in summary table
+        assert re.findall(r'<td>.*href="#dummy_submodule\.submodule2'
+                          r'\.SubmoduleClass2\.func2".*</td>', html)
+
 
 class TestAutoDocSummDirective:
     """Test case for the :class:`autodocsumm.AutoDocSummDirective`."""

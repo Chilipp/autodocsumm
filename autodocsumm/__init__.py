@@ -279,8 +279,15 @@ class AutosummaryDocumenter(object):
         self.options.update(options_save)
         return documenters
 
-    def add_autosummary(self):
-        """Add the autosammary table of this documenter."""
+    def add_autosummary(self, relative_ref_paths=False):
+        """Add the autosammary table of this documenter.
+
+        Parameters
+        ==========
+        relative_ref_paths: bool
+            Use paths relative to the current module instead of
+            absolute import paths for each object
+        """
         if (
             self.options.get("autosummary")
             and not self.options.get("no-autosummary")
@@ -303,8 +310,14 @@ class AutosummaryDocumenter(object):
                 indent = '    '
 
                 for (documenter, _) in documenters:
-                    self.add_line(
-                        indent + '~' + documenter.fullname, sourcename)
+                    if relative_ref_paths:
+                        obj_ref_path = documenter.fullname.lstrip(
+                            self.modname + '.')
+                    else:
+                        obj_ref_path = documenter.fullname
+
+                    self.add_line(indent + '~' + obj_ref_path, sourcename)
+
                 self.add_line('', sourcename)
 
 
@@ -351,7 +364,7 @@ class AutoSummModuleDocumenter(ModuleDocumenter, AutosummaryDocumenter):
     def add_content(self, *args, **kwargs):
         super().add_content(*args, **kwargs)
 
-        self.add_autosummary()
+        self.add_autosummary(relative_ref_paths=True)
 
         if self.options.get("autosummary-no-nesting"):
             self.options["no-autosummary"] = "True"
@@ -400,7 +413,7 @@ class AutoSummClassDocumenter(ClassDocumenter, AutosummaryDocumenter):
     def add_content(self, *args, **kwargs):
         super().add_content(*args, **kwargs)
 
-        self.add_autosummary()
+        self.add_autosummary(relative_ref_paths=True)
 
 
 class CallableDataDocumenter(DataDocumenter):
