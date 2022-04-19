@@ -212,10 +212,7 @@ class TestAutosummaryDocumenter:
         if sphinx_version[:2] > [3, 1]:
             assert in_autosummary("instance_attribute", html)
         elif sphinx_version[:2] < [3, 1]:
-            assert (
-                '<span class="pre">dummy.TestClass.instance_attribute</span>'
-                in html
-            )
+            assert in_autosummary("TestClass.instance_attribute", html)
 
         assert in_autosummary("test_method", html)
         assert in_autosummary("test_attr", html)
@@ -267,10 +264,7 @@ class TestAutosummaryDocumenter:
         if sphinx_version[:2] > [3, 1]:
             assert in_autosummary("instance_attribute", html)
         elif sphinx_version[:2] < [3, 1]:
-            assert (
-                '<span class="pre">dummy.TestClass.instance_attribute</span>'
-                in html
-            )
+            assert in_autosummary("TestClass.instance_attribute", html)
 
         assert in_autosummary("test_attr", html)
         assert in_autosummary("large_data", html)
@@ -287,10 +281,7 @@ class TestAutosummaryDocumenter:
         if sphinx_version[:2] > [3, 1]:
             assert in_autosummary("instance_attribute", html)
         elif sphinx_version[:2] < [3, 1]:
-            assert (
-                '<span class="pre">dummy.TestClass.instance_attribute</span>'
-                in html
-            )
+            assert in_autosummary("TestClass.instance_attribute", html)
 
         assert in_autosummary("test_method", html)
         assert in_autosummary("test_attr", html)
@@ -314,10 +305,7 @@ class TestAutosummaryDocumenter:
         if sphinx_version[:2] > [3, 1]:
             assert in_autosummary("instance_attribute", html)
         elif sphinx_version[:2] < [3, 1]:
-            assert (
-                '<span class="pre">dummy.TestClass.instance_attribute</span>'
-                in html
-            )
+            assert in_autosummary("TestClass.instance_attribute", html)
 
         assert in_autosummary("test_method", html)
         assert in_autosummary("test_attr", html)
@@ -365,6 +353,28 @@ class TestAutosummaryDocumenter:
         docstring_end = html.index("This is after the summary")
 
         assert docstring_end > methods_start
+
+    def test_class_submodule(self, app):
+        app.build()
+
+        html = get_html(app, '/test_class_submodule.html')
+
+        # check that hyperlink for instance method exists in summary table
+        assert re.findall(r'<td>.*href="#dummy_submodule\.submodule1'
+                          r'\.SubmoduleClass1\.func1".*</td>', html)
+
+    def test_module_submodule(self, app):
+        app.build()
+
+        html = get_html(app, '/test_module_submodule.html')
+
+        # check that hyperlink for class exists in summary table
+        assert re.findall(r'<td>.*href="#dummy_submodule\.submodule2'
+                          r'\.SubmoduleClass2".*</td>', html)
+
+        # check that hyperlink for instance method exists in summary table
+        assert re.findall(r'<td>.*href="#dummy_submodule\.submodule2'
+                          r'\.SubmoduleClass2\.func2".*</td>', html)
 
 
 class TestAutoDocSummDirective:
