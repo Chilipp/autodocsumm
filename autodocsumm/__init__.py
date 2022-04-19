@@ -310,11 +310,11 @@ class AutosummaryDocumenter(object):
                 indent = '    '
 
                 for (documenter, _) in documenters:
+                    obj_ref_path = documenter.fullname
                     if relative_ref_paths:
-                        obj_ref_path = documenter.fullname.lstrip(
-                            self.modname + '.')
-                    else:
-                        obj_ref_path = documenter.fullname
+                        modname = self.modname + "."
+                        if documenter.fullname.startswith(modname):
+                            obj_ref_path = documenter.fullname[len(modname):]
 
                     self.add_line(indent + '~' + obj_ref_path, sourcename)
 
