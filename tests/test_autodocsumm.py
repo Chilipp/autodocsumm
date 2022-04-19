@@ -18,6 +18,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 import re
+import bs4
 import pytest
 import sphinx
 
@@ -39,22 +40,34 @@ def get_html(app, fname):
         return f.read()
 
 
+def in_autosummary(what, html) -> bool:
+    soup = bs4.BeautifulSoup(html)
+    autosummaries = soup("table")
+    found = False
+    for tag in autosummaries:
+        if tag.find_all("span", string=what):
+            found = True
+            break
+    return found
+
+
 class TestAutosummaryDocumenter:
+
     def test_module(self, app):
         app.build()
         html = get_html(app, 'test_module.html')
-        assert '<span class="pre">TestClass</span>' in html
-        assert '<span class="pre">test_func</span>' in html
-        assert '<span class="pre">test_method</span>' in html
-        assert '<span class="pre">test_attr</span>' in html
+        assert in_autosummary("TestClass", html)
+        assert in_autosummary("test_func", html)
+        assert in_autosummary("test_method", html)
+        assert in_autosummary("test_attr", html)
 
         # test whether the right objects are included
-        assert '<span class="pre">class_caller</span>' in html
+        assert in_autosummary("class_caller", html)
         assert 'Caller docstring for class attribute' in html
 
         # test whether the data is shown correctly
-        assert '<span class="pre">large_data</span>' in html
-        assert '<span class="pre">small_data</span>' in html
+        assert in_autosummary("large_data", html)
+        assert in_autosummary("small_data", html)
 
         try:
             assert 'Should be included' in html
@@ -94,26 +107,17 @@ class TestAutosummaryDocumenter:
         app.build()
         html = get_html(app, 'test_module_no_nesting.html')
 
-        assert '<span class="pre">TestClass</span>' in html
-        assert '<span class="pre">test_func</span>' in html
+        assert in_autosummary("TestClass", html)
+        assert in_autosummary("test_func", html)
 
         # test whether the data is shown correctly
-        assert '<span class="pre">large_data</span>' in html
-        assert '<span class="pre">small_data</span>' in html
+        assert in_autosummary("large_data", html)
+        assert in_autosummary("small_data", html)
 
-        # test that elements of TestClass are not autosummarized, since nesting is disabled.
-        try:
-            assert '<span class="pre">test_method</span>' not in html
-            assert '<span class="pre">test_attr</span>' not in html
-        except AssertionError:  # sphinx>=3.5
-            found_methods = re.findall(
-                '<span class="pre">test_method</span>', html
-            )
-            assert len(found_methods) == 1
-            found_attrs = re.findall(
-                '<span class="pre">test_attr</span>', html
-            )
-            assert len(found_attrs) == 1
+        # test that elements of TestClass are not autosummarized,
+        # since nesting is disabled.
+        assert not in_autosummary("test_method", html)
+        assert not in_autosummary("test_attr", html)
 
         # test the members are still displayed
         assert re.search(
@@ -124,12 +128,12 @@ class TestAutosummaryDocumenter:
     def test_module_summary_only(self, app):
         app.build()
         html = get_html(app, 'test_module_summary_only.html')
-        assert '<span class="pre">TestClass</span>' in html
-        assert '<span class="pre">test_func</span>' in html
+        assert in_autosummary("TestClass", html)
+        assert in_autosummary("test_func", html)
 
         # test whether the data is shown correctly
-        assert '<span class="pre">large_data</span>' in html
-        assert '<span class="pre">small_data</span>' in html
+        assert in_autosummary("large_data", html)
+        assert in_autosummary("small_data", html)
 
         assert not re.search(
             r'<dt( class=".*")? id="dummy.Class_CallTest"( class=".*")*>',
@@ -139,18 +143,18 @@ class TestAutosummaryDocumenter:
     def test_module_with_title(self, app):
         app.build()
         html = get_html(app, 'test_module_title.html')
-        assert '<span class="pre">TestClass</span>' in html
-        assert '<span class="pre">test_func</span>' in html
-        assert '<span class="pre">test_method</span>' in html
-        assert '<span class="pre">test_attr</span>' in html
+        assert in_autosummary("TestClass", html)
+        assert in_autosummary("test_func", html)
+        assert in_autosummary("test_method", html)
+        assert in_autosummary("test_attr", html)
 
         # test whether the right objects are included
-        assert '<span class="pre">class_caller</span>' in html
+        assert in_autosummary("class_caller", html)
         assert 'Caller docstring for class attribute' in html
 
         # test whether the data is shown correctly
-        assert '<span class="pre">large_data</span>' in html
-        assert '<span class="pre">small_data</span>' in html
+        assert in_autosummary("large_data", html)
+        assert in_autosummary("small_data", html)
         try:
             assert 'Should be included' in  html
         except AssertionError: # sphinx>=3.5
@@ -188,12 +192,12 @@ class TestAutosummaryDocumenter:
         app.build()
 
         html = get_html(app, 'test_module_nosignatures.html')
-        assert '<span class="pre">TestClass</span>' in html
-        assert '<span class="pre">test_func</span>' in html
+        assert in_autosummary("TestClass", html)
+        assert in_autosummary("test_func", html)
 
         # test whether the data is shown correctly
-        assert '<span class="pre">large_data</span>' in html
-        assert '<span class="pre">small_data</span>' in html
+        assert in_autosummary("large_data", html)
+        assert in_autosummary("small_data", html)
 
         assert not re.search(
             r'<dt( class=".*")? id="dummy.Class_CallTest"( class=".*")*>',
@@ -206,15 +210,15 @@ class TestAutosummaryDocumenter:
         html = get_html(app, '/test_class.html')
 
         if sphinx_version[:2] > [3, 1]:
-            assert '<span class="pre">instance_attribute</span>' in html
+            assert in_autosummary("instance_attribute", html)
         elif sphinx_version[:2] < [3, 1]:
             assert (
                 '<span class="pre">dummy.TestClass.instance_attribute</span>'
                 in html
             )
 
-        assert '<span class="pre">test_method</span>' in html
-        assert '<span class="pre">test_attr</span>' in html
+        assert in_autosummary("test_method", html)
+        assert in_autosummary("test_attr", html)
 
         # test escaping of *
         assert r'\*args' not in html
@@ -223,12 +227,12 @@ class TestAutosummaryDocumenter:
         assert '**kwargs' in html
 
         # test whether the right objects are included
-        assert '<span class="pre">class_caller</span>' in html
+        assert in_autosummary("class_caller", html)
         assert 'Caller docstring for class attribute' in html
 
         # test whether the data is shown correctly
-        assert '<span class="pre">large_data</span>' in html
-        assert '<span class="pre">small_data</span>' in html
+        assert in_autosummary("large_data", html)
+        assert in_autosummary("small_data", html)
 
         assert 'Should be skipped' not in html
         try:
@@ -261,15 +265,15 @@ class TestAutosummaryDocumenter:
         html = get_html(app, '/test_class_order.html')
 
         if sphinx_version[:2] > [3, 1]:
-            assert '<span class="pre">instance_attribute</span>' in html
+            assert in_autosummary("instance_attribute", html)
         elif sphinx_version[:2] < [3, 1]:
             assert (
                 '<span class="pre">dummy.TestClass.instance_attribute</span>'
                 in html
             )
 
-        assert '<span class="pre">test_attr</span>' in html
-        assert '<span class="pre">large_data</span>' in html
+        assert in_autosummary("test_attr", html)
+        assert in_autosummary("large_data", html)
 
         assert (
             html.index('<span class="pre">test_attr</span>')
@@ -281,22 +285,22 @@ class TestAutosummaryDocumenter:
         html = get_html(app, '/test_class_summary_only.html')
 
         if sphinx_version[:2] > [3, 1]:
-            assert '<span class="pre">instance_attribute</span>' in html
+            assert in_autosummary("instance_attribute", html)
         elif sphinx_version[:2] < [3, 1]:
             assert (
                 '<span class="pre">dummy.TestClass.instance_attribute</span>'
                 in html
             )
 
-        assert '<span class="pre">test_method</span>' in html
-        assert '<span class="pre">test_attr</span>' in html
+        assert in_autosummary("test_method", html)
+        assert in_autosummary("test_attr", html)
 
         # test whether the right objects are included
-        assert '<span class="pre">class_caller</span>' in html
+        assert in_autosummary("class_caller", html)
 
         # test whether the data is shown correctly
-        assert '<span class="pre">large_data</span>' in html
-        assert '<span class="pre">small_data</span>' in html
+        assert in_autosummary("large_data", html)
+        assert in_autosummary("small_data", html)
 
         assert not re.search(
             r'<dt( class=".*")? id="dummy.TestClass.small_data"( class=".*")*>',
@@ -308,22 +312,22 @@ class TestAutosummaryDocumenter:
         html = get_html(app, '/test_class_nosignatures.html')
 
         if sphinx_version[:2] > [3, 1]:
-            assert '<span class="pre">instance_attribute</span>' in html
+            assert in_autosummary("instance_attribute", html)
         elif sphinx_version[:2] < [3, 1]:
             assert (
                 '<span class="pre">dummy.TestClass.instance_attribute</span>'
                 in html
             )
 
-        assert '<span class="pre">test_method</span>' in html
-        assert '<span class="pre">test_attr</span>' in html
+        assert in_autosummary("test_method", html)
+        assert in_autosummary("test_attr", html)
 
         # test whether the right objects are included
-        assert '<span class="pre">class_caller</span>' in html
+        assert in_autosummary("class_caller", html)
 
         # test whether the data is shown correctly
-        assert '<span class="pre">large_data</span>' in html
-        assert '<span class="pre">small_data</span>' in html
+        assert in_autosummary("large_data", html)
+        assert in_autosummary("small_data", html)
 
         assert not re.search(
             r'<dt( class=".*")? id="dummy.TestClass.small_data"( class=".*")*>',
@@ -335,7 +339,7 @@ class TestAutosummaryDocumenter:
     def test_inherited(self, app):
         app.build()
         html = get_html(app, '/test_inherited.html')
-        assert '<span class="pre">test_method</span>' in html
+        assert in_autosummary("test_method", html)
 
     @pytest.mark.xfail
     def test_warnings_depreciation(self, app):
@@ -376,8 +380,8 @@ class TestAutoDocSummDirective:
         assert "Class test for autosummary" not in html
 
         # test if the methods and attributes are there in a table
-        assert '<span class="pre">test_method</span>' in html
-        assert '<span class="pre">test_attr</span>' in html
+        assert in_autosummary("test_method", html)
+        assert in_autosummary("test_attr", html)
 
     def test_autoclasssumm_no_titles(self, app):
         """Test building the autosummary of a class."""
@@ -389,8 +393,8 @@ class TestAutoDocSummDirective:
         assert "Class test for autosummary" not in html
 
         # test if the methods and attributes are there in a table
-        assert '<span class="pre">test_method</span>' in html
-        assert '<span class="pre">test_attr</span>' in html
+        assert in_autosummary("test_method", html)
+        assert in_autosummary("test_attr", html)
 
         assert "<strong>Methods</strong>" not in html
 
@@ -404,9 +408,9 @@ class TestAutoDocSummDirective:
         assert "Class test for autosummary" not in html
 
         # test if the methods and attributes are there in a table
-        assert '<span class="pre">test_method</span>' not in html
-        assert '<span class="pre">class_caller</span>' in html
-        assert '<span class="pre">test_attr</span>' in html
+        assert not in_autosummary("test_method", html)
+        assert in_autosummary("class_caller", html)
+        assert in_autosummary("test_attr", html)
 
     def test_autoclasssumm_nosignatures(self, app):
         """Test building the autosummary of a class without signatures."""
@@ -418,8 +422,8 @@ class TestAutoDocSummDirective:
         assert "Class test for autosummary" not in html
 
         # test if the methods and attributes are there in a table
-        assert '<span class="pre">test_method</span>' in html
-        assert '<span class="pre">test_attr</span>' in html
+        assert in_autosummary("test_method", html)
+        assert in_autosummary("test_attr", html)
 
         assert '()' not in html
 
@@ -433,9 +437,9 @@ class TestAutoDocSummDirective:
         assert "Module for testing the autodocsumm" not in html
 
         # test if the classes, data and functions are there in a table
-        assert '<span class="pre">Class_CallTest</span>' in html
-        assert '<span class="pre">large_data</span>' in html
-        assert '<span class="pre">test_func</span>' in html
+        assert in_autosummary("Class_CallTest", html)
+        assert in_autosummary("large_data", html)
+        assert in_autosummary("test_func", html)
 
     def test_automodulesumm_some_sections(self, app):
         """Test building the autosummary of a module with some sections only."""
@@ -447,9 +451,9 @@ class TestAutoDocSummDirective:
         assert "Module for testing the autodocsumm" not in html
 
         # test if the classes, data and functions are there in a table
-        assert '<span class="pre">Class_CallTest</span>' not in html
-        assert '<span class="pre">large_data</span>' in html
-        assert '<span class="pre">test_func</span>' in html
+        assert not in_autosummary("Class_CallTest", html)
+        assert in_autosummary("large_data", html)
+        assert in_autosummary("test_func", html)
 
     def test_automodulesumm_nosignatures(self, app):
         """Test building the autosummary of a module without signatures."""
@@ -461,9 +465,9 @@ class TestAutoDocSummDirective:
         assert "Module for testing the autodocsumm" not in html
 
         # test if the classes, data and functions are there in a table
-        assert '<span class="pre">Class_CallTest</span>' in html
-        assert '<span class="pre">large_data</span>' in html
-        assert '<span class="pre">test_func</span>' in html
+        assert in_autosummary("Class_CallTest", html)
+        assert in_autosummary("large_data", html)
+        assert in_autosummary("test_func", html)
 
         assert '()' not in html
 
@@ -472,4 +476,4 @@ class TestAutoDocSummDirective:
 
         html = get_html(app, '/test_empty.html')
 
-        assert '<span class="pre">product</span>' not in html
+        assert not in_autosummary("product", html)

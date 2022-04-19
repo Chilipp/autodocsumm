@@ -36,7 +36,7 @@ jobs:
           SPHINX="${SPHINX}==${SPHINX_VERSION}";
           JINJA2="${JINJA2}<3.1";
         fi
-        pip install pytest pytest-cov codecov "${SPHINX}" "${JINJA2}" -e .
+        pip install pytest pytest-cov codecov "${SPHINX}" "${JINJA2}" beautifulsoup4 -e .
     - name: Test with pytest
       run: |
         pytest --cov=autodocsumm --cov-report=xml tests
