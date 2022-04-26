@@ -41,7 +41,7 @@ def get_html(app, fname):
 
 
 def in_autosummary(what, html) -> bool:
-    soup = bs4.BeautifulSoup(html)
+    soup = bs4.BeautifulSoup(html, "html.parser")
     autosummaries = soup("table")
     found = False
     for tag in autosummaries:
