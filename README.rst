@@ -74,11 +74,13 @@ Simply install it via ``pip``::
 
     $ pip install autodocsumm
 
-Or you install it via::
 
-    $ python setup.py install
+Local development
+^^^^^^^^^^^^^^^^^
 
-from the `source on GitHub`_.
+Use ``pip`` on the `source on GitHub`_::
+
+    $ pip install .
 
 
 .. _source on GitHub: https://github.com/Chilipp/autodocsumm
