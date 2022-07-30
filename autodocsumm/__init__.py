@@ -39,7 +39,7 @@ __email__ = "philipp.sommer@hereon.de"
 
 __status__ = "Production"
 
-__version__ = '0.2.8'
+__version__ = '0.2.9'
 
 from itertools import chain
 
