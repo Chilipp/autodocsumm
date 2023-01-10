@@ -30,7 +30,7 @@ classifiers = [
 
 requires-python = '>= 3.7'
 dependencies = [
-    'Sphinx >= 2.2, < 6.0',
+    'Sphinx >= 2.2, < 7.0',
 ]
 
 [tool.setuptools]
