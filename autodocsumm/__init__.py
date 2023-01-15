@@ -78,14 +78,6 @@ except ImportError:
         return string
 
 
-try:
-    from cyordereddict import OrderedDict
-except ImportError:
-    try:
-        from collections import OrderedDict
-    except ImportError:
-        from ordereddict import OrderedDict
-
 from . import _version
 __version__ = _version.get_versions()['version']
 
@@ -262,7 +254,7 @@ class AutosummaryDocumenter(object):
         except AttributeError:  # sphinx<3.0
             pass
 
-        documenters = OrderedDict()
+        documenters = {}
         for e in memberdocumenters:
             section = self.member_sections.get(
                 e[0].member_order, 'Miscellaneous')
@@ -350,13 +342,13 @@ class AutoSummModuleDocumenter(ModuleDocumenter, AutosummaryDocumenter):
         option_spec['autosummary-' + _option] = option_spec[_option]
     del _option
 
-    member_sections = OrderedDict([
-        (ad.ClassDocumenter.member_order, 'Classes'),
-        (ad.ExceptionDocumenter.member_order, 'Exceptions'),
-        (ad.FunctionDocumenter.member_order, 'Functions'),
-        (ad.DataDocumenter.member_order, 'Data'),
-        ])
-    """:class:`~collections.OrderedDict` that includes the autosummary sections
+    member_sections = {
+        ad.ClassDocumenter.member_order: 'Classes',
+        ad.ExceptionDocumenter.member_order: 'Exceptions',
+        ad.FunctionDocumenter.member_order: 'Functions',
+        ad.DataDocumenter.member_order: 'Data',
+    }
+    """:class:`dict` that includes the autosummary sections
 
     This dictionary defines the sections for the autosummmary option. The
     values correspond to the :attr:`sphinx.ext.autodoc.Documenter.member_order`
@@ -400,12 +392,12 @@ class AutoSummClassDocumenter(ClassDocumenter, AutosummaryDocumenter):
         option_spec['autosummary-' + _option] = option_spec[_option]
     del _option
 
-    member_sections = OrderedDict([
-        (ad.ClassDocumenter.member_order, 'Classes'),
-        (ad.MethodDocumenter.member_order, 'Methods'),
-        (ad.AttributeDocumenter.member_order, 'Attributes'),
-        ])
-    """:class:`~collections.OrderedDict` that includes the autosummary sections
+    member_sections = {
+        ad.ClassDocumenter.member_order: 'Classes',
+        ad.MethodDocumenter.member_order: 'Methods',
+        ad.AttributeDocumenter.member_order: 'Attributes',
+    }
+    """:class:`dict` that includes the autosummary sections
 
     This dictionary defines the sections for the autosummmary option. The
     values correspond to the :attr:`sphinx.ext.autodoc.Documenter.member_order`
