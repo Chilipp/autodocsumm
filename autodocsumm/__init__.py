@@ -39,8 +39,6 @@ __email__ = "philipp.sommer@hereon.de"
 
 __status__ = "Production"
 
-__version__ = '0.2.9'
-
 from itertools import chain
 
 from sphinx.util import logging
@@ -87,6 +85,9 @@ except ImportError:
         from collections import OrderedDict
     except ImportError:
         from ordereddict import OrderedDict
+
+from . import _version
+__version__ = _version.get_versions()['version']
 
 
 logger = logging.getLogger(__name__)
@@ -664,3 +665,5 @@ def setup(app):
     app.add_config_value('document_data', True, True)
     app.add_config_value('not_document_data', [], True)
     return {'version': sphinx.__display_version__, 'parallel_read_safe': True}
+
+
