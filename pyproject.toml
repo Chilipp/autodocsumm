@@ -1,6 +1,6 @@
 [build-system]
 build-backend = 'setuptools.build_meta'
-requires = ['setuptools >= 61.0']
+requires = ['setuptools >= 61.0', 'versioneer[toml]']
 
 [project]
 name = 'autodocsumm'
@@ -42,3 +42,11 @@ exclude = ['docs', 'tests*', 'examples']
 
 [tool.pytest.ini_options]
 addopts = '-v'
+
+[tool.versioneer]
+VCS = 'git'
+style = 'pep440'
+versionfile_source = 'autodocsumm/_version.py'
+versionfile_build = 'autodocsumm/_version.py'
+tag_prefix = 'v'
+parentdir_prefix = 'autodocsumm-'
