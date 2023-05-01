@@ -31,6 +31,10 @@ jobs:
             sphinx-version: ""
           - python-version: "3.10"
             sphinx-version: "4.5"
+          - python-version: "3.11"
+            sphinx-version: ""
+          - python-version: "3.11"
+            sphinx-version: "4.5"
 
     steps:
     - uses: actions/checkout@v2
