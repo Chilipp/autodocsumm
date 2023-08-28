@@ -36,7 +36,7 @@ def in_between(full, sub, s0, *others):
 
 
 def get_html(app, fname):
-    with open(app.outdir + '/' + fname) as f:
+    with open(str(app.outdir) + '/' + fname) as f:
         return f.read()
 
 
