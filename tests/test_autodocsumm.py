@@ -17,7 +17,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-import os.path as osp
+from pathlib import Path
 import re
 import bs4
 import pytest
@@ -37,8 +37,7 @@ def in_between(full, sub, s0, *others):
 
 
 def get_html(app, fname):
-    with open(osp.join(str(app.outdir), fname)) as f:
-        return f.read()
+    return (Path(app.outdir) / fname).read_text()
 
 
 def get_soup(app, fname):
