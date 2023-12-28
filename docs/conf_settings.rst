@@ -135,3 +135,12 @@ Configuration values and events
     To exclude the string representation of specific data objects. You may
     provide a list of fully qualified object names (e.g. in the form of
     ``'zipfile.ZipFile'``) or ``True`` or ``False``
+
+
+.. confval:: autodocsumm_section_sorter
+
+   This can be set with a callable that is passed to :func:`sorted` as key
+   argument to sort the the summary sections by their name. Example usage for
+   an alphanumerical order::
+
+       autodocsumm_section_sorter = lambda s: s

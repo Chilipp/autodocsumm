@@ -270,7 +270,12 @@ class AutosummaryDocumenter(object):
             if not use_sections or section in use_sections:
                 documenters.setdefault(section, []).append(e)
         self.options.update(options_save)
-        return documenters
+
+        if callable(self.env.config.autodocsumm_section_sorter):
+            return {k: documenters[k] for k in sorted(documenters, key=self.env.config.autodocsumm_section_sorter)}
+        else:
+            return documenters
+
 
     def add_autosummary(self, relative_ref_paths=False):
         """Add the autosammary table of this documenter.
@@ -656,6 +661,7 @@ def setup(app):
     app.add_config_value('autodata_content', 'class', True)
     app.add_config_value('document_data', True, True)
     app.add_config_value('not_document_data', [], True)
+    app.add_config_value('autodocsumm_section_sorter', None, True)
     return {'version': sphinx.__display_version__, 'parallel_read_safe': True}
 
 

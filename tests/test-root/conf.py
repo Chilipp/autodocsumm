@@ -24,6 +24,8 @@ autodoc_typehints = "description"
 
 autodata_content = 'both'
 
+autodocsumm_section_sorter = lambda a: a
+
 
 def member_filter(app, what, name, obj, skip, options):
     import dummy
