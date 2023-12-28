@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 # autodocsumm documentation build configuration file, created by
 # sphinx-quickstart on Mon Jul 20 18:01:33 2015.
 #

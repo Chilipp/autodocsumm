@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import sys
 import sphinx
 sys.path.insert(0, '.')
