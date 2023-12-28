@@ -17,6 +17,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
+import os.path as osp
 import re
 import bs4
 import pytest
@@ -36,7 +37,7 @@ def in_between(full, sub, s0, *others):
 
 
 def get_html(app, fname):
-    with open(app.outdir + '/' + fname) as f:
+    with open(osp.join(str(app.outdir), fname)) as f:
         return f.read()
 
 
@@ -207,7 +208,7 @@ class TestAutosummaryDocumenter:
 
     def test_class(self, app):
         app.build()
-        html = get_html(app, '/test_class.html')
+        html = get_html(app, 'test_class.html')
 
         if sphinx_version[:2] > [3, 1]:
             assert in_autosummary("instance_attribute", html)
@@ -259,7 +260,7 @@ class TestAutosummaryDocumenter:
     )
     def test_class_order(self, app):
         app.build()
-        html = get_html(app, '/test_class_order.html')
+        html = get_html(app, 'test_class_order.html')
 
         if sphinx_version[:2] > [3, 1]:
             assert in_autosummary("instance_attribute", html)
@@ -276,7 +277,7 @@ class TestAutosummaryDocumenter:
 
     def test_class_summary_only(self, app):
         app.build()
-        html = get_html(app, '/test_class_summary_only.html')
+        html = get_html(app, 'test_class_summary_only.html')
 
         if sphinx_version[:2] > [3, 1]:
             assert in_autosummary("instance_attribute", html)
@@ -300,7 +301,7 @@ class TestAutosummaryDocumenter:
 
     def test_class_nosignatures(self, app):
         app.build()
-        html = get_html(app, '/test_class_nosignatures.html')
+        html = get_html(app, 'test_class_nosignatures.html')
 
         if sphinx_version[:2] > [3, 1]:
             assert in_autosummary("instance_attribute", html)
@@ -326,7 +327,7 @@ class TestAutosummaryDocumenter:
 
     def test_inherited(self, app):
         app.build()
-        html = get_html(app, '/test_inherited.html')
+        html = get_html(app, 'test_inherited.html')
         assert in_autosummary("test_method", html)
 
     @pytest.mark.xfail
@@ -341,7 +342,7 @@ class TestAutosummaryDocumenter:
         """Test an AutoDocSummDirective inline."""
         app.build()
 
-        html = get_html(app, '/test_autoclasssumm_inline.html')
+        html = get_html(app, 'test_autoclasssumm_inline.html')
 
         methods_title = "<strong>Methods:</strong>"
 
@@ -357,7 +358,7 @@ class TestAutosummaryDocumenter:
     def test_class_submodule(self, app):
         app.build()
 
-        html = get_html(app, '/test_class_submodule.html')
+        html = get_html(app, 'test_class_submodule.html')
 
         # check that hyperlink for instance method exists in summary table
         assert re.findall(r'<td>.*href="#dummy_submodule\.submodule1'
@@ -366,7 +367,7 @@ class TestAutosummaryDocumenter:
     def test_module_submodule(self, app):
         app.build()
 
-        html = get_html(app, '/test_module_submodule.html')
+        html = get_html(app, 'test_module_submodule.html')
 
         # check that hyperlink for class exists in summary table
         assert re.findall(r'<td>.*href="#dummy_submodule\.submodule2'
@@ -384,7 +385,7 @@ class TestAutoDocSummDirective:
         """Test building the autosummary of a class."""
         app.build()
 
-        html = get_html(app, '/test_autoclasssumm.html')
+        html = get_html(app, 'test_autoclasssumm.html')
 
         # the class docstring must not be in the html
         assert "Class test for autosummary" not in html
@@ -397,7 +398,7 @@ class TestAutoDocSummDirective:
         """Test building the autosummary of a class."""
         app.build()
 
-        html = get_html(app, '/test_autoclasssumm_no_titles.html')
+        html = get_html(app, 'test_autoclasssumm_no_titles.html')
 
         # the class docstring must not be in the html
         assert "Class test for autosummary" not in html
@@ -412,7 +413,7 @@ class TestAutoDocSummDirective:
         """Test building the autosummary of a class with some sections only."""
         app.build()
 
-        html = get_html(app, '/test_autoclasssumm_some_sections.html')
+        html = get_html(app, 'test_autoclasssumm_some_sections.html')
 
         # the class docstring must not be in the html
         assert "Class test for autosummary" not in html
@@ -426,7 +427,7 @@ class TestAutoDocSummDirective:
         """Test building the autosummary of a class without signatures."""
         app.build()
 
-        html = get_html(app, '/test_autoclasssumm_nosignatures.html')
+        html = get_html(app, 'test_autoclasssumm_nosignatures.html')
 
         # the class docstring must not be in the html
         assert "Class test for autosummary" not in html
@@ -441,7 +442,7 @@ class TestAutoDocSummDirective:
         """Test building the autosummary of a module."""
         app.build()
 
-        html = get_html(app, '/test_automodulesumm.html')
+        html = get_html(app, 'test_automodulesumm.html')
 
         # the class docstring must not be in the html
         assert "Module for testing the autodocsumm" not in html
@@ -455,7 +456,7 @@ class TestAutoDocSummDirective:
         """Test building the autosummary of a module with some sections only."""
         app.build()
 
-        html = get_html(app, '/test_automodulesumm_some_sections.html')
+        html = get_html(app, 'test_automodulesumm_some_sections.html')
 
         # the class docstring must not be in the html
         assert "Module for testing the autodocsumm" not in html
@@ -469,7 +470,7 @@ class TestAutoDocSummDirective:
         """Test building the autosummary of a module without signatures."""
         app.build()
 
-        html = get_html(app, '/test_automodulesumm_nosignatures.html')
+        html = get_html(app, 'test_automodulesumm_nosignatures.html')
 
         # the class docstring must not be in the html
         assert "Module for testing the autodocsumm" not in html
@@ -484,6 +485,6 @@ class TestAutoDocSummDirective:
     def test_empty(self, app):
         app.build()
 
-        html = get_html(app, '/test_empty.html')
+        html = get_html(app, 'test_empty.html')
 
         assert not in_autosummary("product", html)
