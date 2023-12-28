@@ -36,8 +36,7 @@ def in_between(full, sub, s0, *others):
 
 
 def get_html(app, fname):
-    with open(str(app.outdir) + '/' + fname) as f:
-        return f.read()
+    return (app.outdir / fname).read_text()
 
 
 def in_autosummary(what, html) -> bool:
