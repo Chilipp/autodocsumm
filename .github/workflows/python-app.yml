@@ -35,6 +35,9 @@ jobs:
             sphinx-version: ""
           - python-version: "3.11"
             sphinx-version: "4.5"
+        exclude:
+          - python-version: "3.8"
+            sphinx-version: "7.2.*"
 
     steps:
     - uses: actions/checkout@v2
