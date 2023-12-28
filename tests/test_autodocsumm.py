@@ -47,13 +47,7 @@ def get_soup(app, fname):
 
 def in_autosummary(what, html) -> bool:
     soup = bs4.BeautifulSoup(html, "html.parser")
-    autosummaries = soup("table")
-    found = False
-    for tag in autosummaries:
-        if tag.find_all("span", string=what):
-            found = True
-            break
-    return found
+    return any(tag.find_all("span", string=what) for tag in soup("table"))
 
 
 class TestAutosummaryDocumenter:
