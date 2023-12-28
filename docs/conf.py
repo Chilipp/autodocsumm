@@ -16,7 +16,6 @@ import sys
 import os
 import os.path as osp
 import re
-import six
 import autodocsumm
 
 # If extensions (or modules to document with autodoc) are in another directory,
