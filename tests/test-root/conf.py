@@ -23,7 +23,7 @@ autodoc_typehints = "description"
 
 autodata_content = 'both'
 
-autodocsumm_section_sorter = lambda a: a
+autodocsumm_section_sorter = True
 
 
 def member_filter(app, what, name, obj, skip, options):

@@ -139,8 +139,12 @@ Configuration values and events
 
 .. confval:: autodocsumm_section_sorter
 
-   This can be set with a callable that is passed to :func:`sorted` as key
-   argument to sort the the summary sections by their name. Example usage for
-   an alphanumerical order::
+   When ``True`` the summarizing sections will be sorted alphanumerically by
+   their section title. Alternatively a callable can be set that is passed to
+   :func:`sorted` as key argument to sort the the summary sections by their
+   name.
+   The default value is ``None``.
+   Example usage with a tuple that defines an arbitrary order:
 
-       autodocsumm_section_sorter = lambda s: s
+       sections_order = ("Public methods", "Attributes", "Private methods")
+       autodocsumm_section_sorter = lambda title: sections_order.index(title)

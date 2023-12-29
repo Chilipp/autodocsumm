@@ -271,8 +271,11 @@ class AutosummaryDocumenter(object):
                 documenters.setdefault(section, []).append(e)
         self.options.update(options_save)
 
-        if callable(self.env.config.autodocsumm_section_sorter):
-            return {k: documenters[k] for k in sorted(documenters, key=self.env.config.autodocsumm_section_sorter)}
+        sort_option = self.env.config.autodocsumm_section_sorter
+        if sort_option is True:
+            return {k: documenters[k] for k in sorted(documenters)}
+        elif callable(sort_option):
+            return {k: documenters[k] for k in sorted(documenters, key=sort_option)}
         else:
             return documenters
 
