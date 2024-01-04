@@ -146,12 +146,16 @@ Configuration values and events
    The default value is ``None``.
    Example usage with a tuple that defines an arbitrary order:
 
+   .. code-block:: python
+
        sections_order = ("Public methods", "Attributes", "Private methods")
        autodocsumm_section_sorter = lambda title: sections_order.index(title)
 
    An example for cases that only ensures that "Constructors" are always listed
    first and "Attributes" while not failing when encountering undefined section
    weights:
+
+   .. code-block:: python
 
        section_weights = {"Attributes": 100, "Constructors": -100}
        autodocsumm_section_sorter = lambda title: sections_weights.get(title, 0)
