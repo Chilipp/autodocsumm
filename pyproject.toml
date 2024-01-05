@@ -8,7 +8,6 @@ dynamic = ["version"]
 description = 'Extended sphinx autodoc including automatic autosummaries'
 readme = 'README.rst'
 keywords = ['sphinx', 'autodoc', 'autosummary', 'content', 'table']
-urls.homepage = 'https://github.com/Chilipp/autodocsumm'
 authors = [
     { name = 'Philipp S. Sommer', email = 'philipp.sommer@hereon.de' },
 ]
@@ -33,6 +32,12 @@ requires-python = '>= 3.7'
 dependencies = [
     'Sphinx >= 2.2, < 8.0',
 ]
+
+[project.urls]
+Homepage = "https://github.com/Chilipp/autodocsumm"
+Documentation = "https://autodocsumm.readthedocs.io/en/latest/"
+Source = "https://github.com/Chilipp/autodocsumm"
+Tracker = "https://github.com/Chilipp/autodocsumm/issues"
 
 [tool.setuptools]
 zip-safe = false
