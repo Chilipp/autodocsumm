@@ -18,7 +18,7 @@ Extending your autodoc API docs with a summary
         * - docs
           - |docs|
         * - tests
-          - |github-action| |requires| |codecov|
+          - |github-action| |codecov|
         * - package
           - |version| |supported-versions| |supported-implementations|
 
@@ -33,10 +33,6 @@ Extending your autodoc API docs with a summary
     .. |codecov| image:: https://codecov.io/gh/Chilipp/autodocsumm/branch/master/graph/badge.svg?token=I9wlZyhI4Y
         :alt: Codecov
         :target: https://codecov.io/gh/Chilipp/autodocsumm
-
-    .. |requires| image:: https://requires.io/github/Chilipp/autodocsumm/requirements.svg?branch=master
-        :alt: Requirements Status
-        :target: https://requires.io/github/Chilipp/autodocsumm/requirements/?branch=master
 
     .. |version| image:: https://img.shields.io/pypi/v/autodocsumm.svg?style=flat
         :alt: PyPI Package latest release
