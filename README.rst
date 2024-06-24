@@ -14,6 +14,8 @@ Extending your autodoc API docs with a summary
       - |github-action| |codecov|
     * - package
       - |version| |supported-versions| |supported-implementations|
+    * - downloads
+      - |downloads|
 
 .. |docs| image:: http://readthedocs.org/projects/autodocsumm/badge/?version=latest
     :alt: Documentation Status
@@ -38,6 +40,10 @@ Extending your autodoc API docs with a summary
 .. |supported-implementations| image:: https://img.shields.io/pypi/implementation/autodocsumm.svg?style=flat
     :alt: Supported implementations
     :target: https://pypi.python.org/pypi/autodocsumm
+
+.. |downloads| image:: https://assets.piptrends.com/get-last-month-downloads-badge/autodocsumm.svg
+    :alt: autodocsumm Downloads Last Month by pip Trends
+    :target: https://piptrends.com/package/autodocsumm
 
 
 .. end-badges
