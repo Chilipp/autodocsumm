@@ -1,11 +1,15 @@
 import os.path as osp
-import sys
 import pytest
+import sphinx
+import sys
+from packaging.version import Version
 
-from sphinx.testing.path import path
+if Version(sphinx.__version__) < Version("8.0.0"):
+    from sphinx.testing.path import path
+else:
+    from pathlib import Path as path
 
 pytest_plugins = 'sphinx.testing.fixtures'
-
 
 
 sphinx_supp = osp.abspath(osp.join(osp.dirname(__file__), "tests"))

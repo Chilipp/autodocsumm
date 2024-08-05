@@ -25,12 +25,13 @@ classifiers = [
     'Programming Language :: Python :: 3.9',
     'Programming Language :: Python :: 3.10',
     'Programming Language :: Python :: 3.11',
+    'Programming Language :: Python :: 3.12',
     'Operating System :: OS Independent',
 ]
 
 requires-python = '>= 3.7'
 dependencies = [
-    'Sphinx >= 2.2, < 8.0',
+    'Sphinx >= 2.2, < 9.0',
 ]
 
 [project.urls]
