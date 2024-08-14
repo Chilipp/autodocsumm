@@ -414,7 +414,11 @@ class AutoSummClassDocumenter(ClassDocumenter, AutosummaryDocumenter):
     def add_content(self, *args, **kwargs):
         super().add_content(*args, **kwargs)
 
-        self.add_autosummary(relative_ref_paths=True)
+        # If the class is already documented under another name, Sphinx
+        # documents it as data/attribute. In this case, we do not want to
+        # generate an autosummary of the class for the attribute (see #69).
+        if not self.doc_as_attr:
+            self.add_autosummary(relative_ref_paths=True)
 
 
 class CallableDataDocumenter(DataDocumenter):
