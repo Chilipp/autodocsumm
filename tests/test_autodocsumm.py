@@ -484,6 +484,17 @@ class TestAutoDocSummDirective:
 
         assert '()' not in html
 
+    def test_automodulesumm_exclude_members(self, app):
+        """Test building the autosummary of a module with some members
+        excluded from the autosummary."""
+        app.build()
+
+        html = get_html(app, 'test_module_exclude_members.html')
+
+        assert in_autosummary("TestClass", html)
+        assert not in_autosummary("InheritedTestClass", html)
+
+
     def test_empty(self, app):
         app.build()
 
