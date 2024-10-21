@@ -40,6 +40,7 @@ __email__ = "philipp.sommer@hereon.de"
 __status__ = "Production"
 
 from itertools import chain
+from typing import TYPE_CHECKING
 
 from sphinx.util import logging
 import re
@@ -53,7 +54,7 @@ from sphinx.util.docutils import SphinxDirective
 from sphinx.ext.autodoc import (
     ClassDocumenter, ModuleDocumenter, ALL, PycodeError,
     ModuleAnalyzer, AttributeDocumenter, DataDocumenter, Options,
-    prepare_docstring)
+    Documenter, prepare_docstring)
 import sphinx.ext.autodoc as ad
 
 signature = Signature = None
@@ -80,6 +81,12 @@ except ImportError:
 
 from . import _version
 __version__ = _version.get_versions()['version']
+
+
+if TYPE_CHECKING:  # pragma: no cover
+    DOCUMENTER_MIXIN_BASE = Documenter
+else:
+    DOCUMENTER_MIXIN_BASE = object
 
 
 logger = logging.getLogger(__name__)
@@ -125,7 +132,7 @@ def _get_arg(param, pos, default, *args, **kwargs):
         return default
 
 
-class AutosummaryDocumenter(object):
+class AutosummaryDocumenter(DOCUMENTER_MIXIN_BASE):
     """Abstract class for for extending Documenter methods
 
     This classed is used as a base class for Documenters in order to provide
@@ -136,6 +143,8 @@ class AutosummaryDocumenter(object):
 
     #: Grouper functions
     grouper_funcs = []
+
+    member_sections: dict
 
     def __init__(self):
         raise NotImplementedError
@@ -286,7 +295,6 @@ class AutosummaryDocumenter(object):
             return {k: documenters[k] for k in sorted(documenters, key=sort_option)}
         else:
             return documenters
-
 
     def add_autosummary(self, relative_ref_paths=False):
         """Add the autosammary table of this documenter.
