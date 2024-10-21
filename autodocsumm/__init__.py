@@ -220,8 +220,16 @@ class AutosummaryDocumenter(object):
 
         # remove members given by exclude-members
         if self.options.exclude_members:
-            members = [(membername, member) for (membername, member) in members
-                       if membername not in self.options.exclude_members]
+            try:
+                members = [
+                    member for member in members
+                    if member.__name__ not in self.options.exclude_members
+                ]
+            except AttributeError:  # Sphinx<3.4.0
+                members = [
+                    (membername, member) for (membername, member) in members
+                    if membername not in self.options.exclude_members
+                ]
 
         # document non-skipped members
         memberdocumenters = []

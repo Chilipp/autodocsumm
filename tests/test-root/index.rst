@@ -5,6 +5,7 @@ Example documentation
 
     test_module
     test_module_summary_only
+    test_module_exclude_members
     test_class
     test_class_order
     test_class_summary_only
