@@ -252,6 +252,17 @@ class TestAutosummaryDocumenter:
             'DummySection'
         )
 
+    def test_exception(self, app):
+        app.build()
+        html = get_html(app, 'test_exception.html')
+
+        if sphinx_version[:2] > [3, 1]:
+            assert in_autosummary("exception_instance_attribute", html)
+        elif sphinx_version[:2] < [3, 1]:
+            assert in_autosummary("TestException.exception_instance_attribute", html)
+
+        assert in_autosummary("test_exception_method", html)
+
     @pytest.mark.skipif(
         sphinx_version[:2] < [3, 1], reason="Only available for sphinx>=3"
     )
@@ -411,6 +422,19 @@ class TestAutoDocSummDirective:
         # test if the methods and attributes are there in a table
         assert in_autosummary("test_method", html)
         assert in_autosummary("test_attr", html)
+
+    def test_autoexceptionsumm(self, app):
+        """Test building the autosummary of a class."""
+        app.build()
+
+        html = get_html(app, 'test_autoexceptionsumm.html')
+
+        # the class docstring must not be in the html
+        assert "Class exception for autosummary" not in html
+
+        # test if the methods and attributes are there in a table
+        assert in_autosummary("test_exception_method", html)
+        assert in_autosummary("exception_instance_attribute", html)
 
     def test_autoclasssumm_no_titles(self, app):
         """Test building the autosummary of a class."""
