@@ -53,7 +53,7 @@ from sphinx.util.docutils import SphinxDirective
 
 from sphinx.ext.autodoc import (
     ClassDocumenter, ModuleDocumenter, ALL, PycodeError,
-    ModuleAnalyzer, AttributeDocumenter, DataDocumenter, Options,
+    ModuleAnalyzer, AttributeDocumenter, DataDocumenter, Options, ExceptionDocumenter,
     Documenter, prepare_docstring)
 import sphinx.ext.autodoc as ad
 
@@ -349,7 +349,7 @@ class AutoSummModuleDocumenter(ModuleDocumenter, AutosummaryDocumenter):
 
     #: slightly higher priority than
     #: :class:`sphinx.ext.autodoc.ModuleDocumenter`
-    priority = ModuleDocumenter.priority + 0.1
+    priority = ModuleDocumenter.priority + 0.1  # type: ignore[assignment]
 
     #: original option_spec from :class:`sphinx.ext.autodoc.ModuleDocumenter`
     #: but with additional autosummary boolean option
@@ -399,7 +399,7 @@ class AutoSummClassDocumenter(ClassDocumenter, AutosummaryDocumenter):
 
     #: slightly higher priority than
     #: :class:`sphinx.ext.autodoc.ClassDocumenter`
-    priority = ClassDocumenter.priority + 0.1
+    priority = ClassDocumenter.priority + 0.1  # type: ignore[assignment]
 
     #: original option_spec from :class:`sphinx.ext.autodoc.ClassDocumenter`
     #: but with additional autosummary boolean option
@@ -437,11 +437,64 @@ class AutoSummClassDocumenter(ClassDocumenter, AutosummaryDocumenter):
             self.add_autosummary(relative_ref_paths=True)
 
 
+class AutoSummExceptionDocumenter(ExceptionDocumenter, AutosummaryDocumenter):
+    """Exception Documenter with autosummary tables for its members.
+
+    This class has the same functionality as the base
+    :class:`sphinx.ext.autodoc.ExceptionDocumenter` class but with an 
+    additional `autosummary` option to provide the ability to provide a summary 
+    of all methods and attributes.
+    It's priority is slightly higher than the one of the ExceptionDocumenter
+    """
+
+    #: slightly higher priority than
+    #: :class:`sphinx.ext.autodoc.ExceptionDocumenter`
+    priority = ExceptionDocumenter.priority + 0.1  # type: ignore[assignment]
+
+    #: original option_spec from 
+    #: :class:`sphinx.ext.autodoc.ExceptionDocumenter` but with additional 
+    #: autosummary boolean option
+    option_spec = ExceptionDocumenter.option_spec.copy()
+    option_spec['autosummary'] = bool_option
+    option_spec['autosummary-no-nesting'] = bool_option
+    option_spec['autosummary-sections'] = list_option
+    option_spec['autosummary-no-titles'] = bool_option
+    option_spec['autosummary-force-inline'] = bool_option
+    option_spec['autosummary-nosignatures'] = bool_option
+
+    #: Add options for members for the autosummary
+    for _option in member_options.intersection(option_spec):
+        option_spec['autosummary-' + _option] = option_spec[_option]
+    del _option
+
+    member_sections = {
+        ad.ExceptionDocumenter.member_order: 'Classes',
+        ad.MethodDocumenter.member_order: 'Methods',
+        ad.AttributeDocumenter.member_order: 'Attributes',
+    }
+    """:class:`dict` that includes the autosummary sections
+
+    This dictionary defines the sections for the autosummmary option. The
+    values correspond to the :attr:`sphinx.ext.autodoc.Documenter.member_order`
+    attribute that shall be used for each section."""
+
+    def add_content(self, *args, **kwargs):
+        super().add_content(*args, **kwargs)
+
+        # If the class is already documented under another name, Sphinx
+        # documents it as data/attribute. In this case, we do not want to
+        # generate an autosummary of the class for the attribute (see #69).
+        if not self.doc_as_attr:
+            self.add_autosummary(relative_ref_paths=True)
+
+
 class CallableDataDocumenter(DataDocumenter):
     """:class:`sphinx.ext.autodoc.DataDocumenter` that uses the __call__ attr
     """
 
-    priority = DataDocumenter.priority + 0.1
+    #: slightly higher priority than
+    #: :class:`sphinx.ext.autodoc.DataDocumenter`
+    priority = DataDocumenter.priority + 0.1  # type: ignore[assignment]
 
     def format_args(self):
         # for classes, the relevant signature is the __init__ method's
@@ -474,6 +527,8 @@ class CallableDataDocumenter(DataDocumenter):
 
         doc = []
         for docstring in docstrings:
+            encoding = _get_arg("encoding", 0, None, *args, **kwargs)
+            ignore = _get_arg("ignore", 1, 1, *args, **kwargs)
             if not isinstance(docstring, str):
                 docstring = force_decode(docstring, encoding)
             doc.append(prepare_docstring(docstring, ignore))
@@ -486,7 +541,9 @@ class CallableAttributeDocumenter(AttributeDocumenter):
     attr
     """
 
-    priority = AttributeDocumenter.priority + 0.1
+    #: slightly higher priority than
+    #: :class:`sphinx.ext.autodoc.AttributeDocumenter`
+    priority = AttributeDocumenter.priority + 0.1  # type: ignore[assignment]
 
     def format_args(self):
         # for classes, the relevant signature is the __init__ method's
@@ -565,7 +622,7 @@ class NoDataDataDocumenter(CallableDataDocumenter):
     """DataDocumenter that prevents the displaying of large data"""
 
     #: slightly higher priority as the one of the CallableDataDocumenter
-    priority = CallableDataDocumenter.priority + 0.1
+    priority = CallableDataDocumenter.priority + 0.1  # type: ignore[assignment]
 
     def __init__(self, *args, **kwargs):
         super(NoDataDataDocumenter, self).__init__(*args, **kwargs)
@@ -580,7 +637,7 @@ class NoDataAttributeDocumenter(CallableAttributeDocumenter):
     """AttributeDocumenter that prevents the displaying of large data"""
 
     #: slightly higher priority as the one of the CallableAttributeDocumenter
-    priority = CallableAttributeDocumenter.priority + 0.1
+    priority = CallableAttributeDocumenter.priority + 0.1  # type: ignore[assignment]
 
     def __init__(self, *args, **kwargs):
         super(NoDataAttributeDocumenter, self).__init__(*args, **kwargs)
@@ -596,13 +653,15 @@ class AutoDocSummDirective(SphinxDirective):
 
     Usage::
 
-        .. autoclasssum:: <Class>
+        .. autoclasssumm:: <Class>
 
-        .. automodsum:: <module>
+        .. automodsumm:: <module>
 
-    The directive additionally supports all options of the ``autoclass`` or
-    ``automod`` directive respectively. Sections can be a list of section titles
-    to be included. If ommitted, all sections are used.
+        .. autoexceptionsumm:: <ExceptionClass>
+
+    The directive additionally supports all options of the ``autoclass``,
+    ``automod``, or ``autoexception`` directive respectively. Sections can be a 
+    list of section titles to be included. If ommitted, all sections are used.
     """
 
     has_content = False
@@ -616,9 +675,9 @@ class AutoDocSummDirective(SphinxDirective):
         reporter = self.state.document.reporter
 
         try:
-            source, lineno = reporter.get_source_and_line(self.lineno)
+            _, lineno = reporter.get_source_and_line(self.lineno)
         except AttributeError:
-            source, lineno = (None, None)
+            _, lineno = (None, None)
 
         # look up target Documenter
         objtype = self.name[4:-4]  # strip prefix (auto-) and suffix (-summ).
@@ -659,6 +718,7 @@ def setup(app):
     app.setup_extension('sphinx.ext.autosummary')
     app.setup_extension('sphinx.ext.autodoc')
     app.add_directive('autoclasssumm', AutoDocSummDirective)
+    app.add_directive('autoexceptionsumm', AutoDocSummDirective)
     app.add_directive('automodulesumm', AutoDocSummDirective)
 
     AUTODOC_DEFAULT_OPTIONS.extend(
@@ -673,7 +733,7 @@ def setup(app):
     registry = app.registry.documenters
     for cls in [AutoSummClassDocumenter, AutoSummModuleDocumenter,
                 CallableAttributeDocumenter, NoDataDataDocumenter,
-                NoDataAttributeDocumenter]:
+                NoDataAttributeDocumenter, AutoSummExceptionDocumenter]:
         if not issubclass(registry.get(cls.objtype), cls):
             app.add_autodocumenter(cls, override=True)
 
