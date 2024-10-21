@@ -84,6 +84,14 @@ class TestClassWithInlineAutoClassSumm:
         pass
 
 
+class TestClassWithRefToOtherClass:
+    """Class test for the autodocsummary when a class attribute is a reference
+    to another class. No autosummary of the class should be generated for
+    the attribute. See also issue #69"""
+
+    foo = TestClass
+
+
 #: data to be skipped
 large_data = 'Should also be skipped'
 

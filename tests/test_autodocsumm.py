@@ -322,6 +322,22 @@ class TestAutosummaryDocumenter:
 
         assert '()' not in html
 
+    def test_class_no_summary_for_reference_to_class(self, app):
+        # see also: issue #69
+        app.build()
+
+        html = get_html(app, 'test_class_with_ref_to_other_class.html')
+
+        # assert that the class itself has an autosummary that contains its
+        # attributes
+        assert in_autosummary("foo", html)
+
+        # Assert that there is no autosummary of the attribute that is an alias
+        # of another class. This autosummary would contain attrs/methods/...
+        # of the referenced class.
+        assert not in_autosummary("test_method", html)
+        assert not in_autosummary("test_attr", html)
+
     def test_inherited(self, app):
         app.build()
         html = get_html(app, 'test_inherited.html')
