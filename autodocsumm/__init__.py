@@ -83,7 +83,7 @@ from . import _version
 __version__ = _version.get_versions()['version']
 
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     DOCUMENTER_MIXIN_BASE = Documenter
 else:
     DOCUMENTER_MIXIN_BASE = object
