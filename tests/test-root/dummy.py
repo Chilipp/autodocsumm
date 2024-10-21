@@ -67,6 +67,18 @@ class TestClass(object):
     small_data = 'Should be skipped'
 
 
+class TestException(Exception):
+    """Exception test for autosummary"""
+
+    def __init__(self):
+        #: This is an exception attribute
+        self.exception_instance_attribute = 1
+
+    def test_exception_method(self):
+        """Test if the method is included"""
+        pass
+
+
 class InheritedTestClass(TestClass):
     """Class test for inherited attributes"""
 

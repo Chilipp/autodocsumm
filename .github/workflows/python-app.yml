@@ -75,31 +75,3 @@ jobs:
         "sphinxcontrib-jsmath<1.0.1"
         "sphinxcontrib-qthelp<1.0.7"
         "sphinxcontrib-serializinghtml<1.1.10"'
-
-
-  build-legacy-sphinx-30plus:
-    name: Build
-
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: [ "3.7", "3.8", "3.9" ]
-        sphinx-version: [
-          "3.0.*",  # possible range: 3.0.0 - 3.5.4
-        ]
-        include:
-          - python-version: "3.7"
-            sphinx-version: "3.5.*"  # latest version that supports py3.7
-    uses: ./.github/workflows/build.yml
-    with:
-      python-version: ${{ matrix.python-version }}
-      extra-requirements: '\
-        "sphinx==${{ matrix.sphinx-version }}"
-        "jinja2<3.1"
-        "alabaster<0.7.14"
-        "sphinxcontrib-applehelp<1.0.8"
-        "sphinxcontrib-devhelp<1.0.6"
-        "sphinxcontrib-htmlhelp<2.0.5"
-        "sphinxcontrib-jsmath<1.0.1"
-        "sphinxcontrib-qthelp<1.0.7"
-        "sphinxcontrib-serializinghtml<1.1.10"'

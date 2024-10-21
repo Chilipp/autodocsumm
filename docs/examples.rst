@@ -8,6 +8,7 @@ Examples
 
     Demo Module <demo_module>
     Demo Class <demo_class>
+    Demo Exception <demo_exception>
     Demo Grouper <demo_grouper>
 
 Including a table of contents
@@ -24,11 +25,16 @@ The *autosummary* flag introduces a small table of contents. So::
 
 produces :ref:`this <demo_module>`. And::
 
-    .. autoclass:: dummy.SomeClass
+    .. autoclass:: dummy.MyClass
         :members:
         :autosummary:
 
-produces :ref:`this <demo_class>`.
+produces :ref:`this <demo_class>`, and for exceptions::
+
+    .. autoexception:: dummy.MyException
+        :members:
+        :autosummary:
+produces :ref:`this <demo_exception>`.
 
 By default, module members are (mainly) grouped according into *Functions*,
 *Classes* and *Data*, class members are grouped into *Methods* and
@@ -178,8 +184,8 @@ section of a class, you can specify::
 Multiple sections might be separated by `;;`, e.g.
 ``:autosummary-sections: Methods ;; Attributes``.
 
-This also works for the ``autoclasssumm`` and ``automodulesumm`` directives,
-e.g.::
+This also works for the ``autoclasssumm``, ``autoexceptionsumm`` and 
+``automodulesumm`` directives, e.g.::
 
     .. autoclasssumm:: dummy.SomeClass
         :autosummary-sections: Methods

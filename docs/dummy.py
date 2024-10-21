@@ -22,5 +22,18 @@ class MyClass(object):
     some_other_attr = None
 
 
+class MyException(object):
+    """Some Exception
+
+    With some description"""
+
+    def do_something_exceptional(self):
+        """Do something exceptional"""
+        pass
+
+    #: Any instance attribute
+    some_exception_attr = None
+
+
 #: Some module data
 large_data = 'Whatever'

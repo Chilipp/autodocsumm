@@ -78,6 +78,11 @@ Directives
     By default, this directives also sets the `:members:` option unless you
     specify `:no-members`.
 
+.. rst:directive:: autoexceptionsumm
+
+    The same as the ``autoclasssumm`` directive, just for an ``Exception`` 
+    subclass.
+
 .. rst:directive:: automodulesumm
 
     The same as the ``autoclasssumm`` directive, just for a module.
