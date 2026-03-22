@@ -49,12 +49,20 @@ from docutils import nodes
 
 import sphinx
 
-from sphinx.util.docutils import SphinxDirective
-
+from sphinx.errors import PycodeError
 from sphinx.ext.autodoc import (
-    ClassDocumenter, ModuleDocumenter, ALL, PycodeError,
-    ModuleAnalyzer, AttributeDocumenter, DataDocumenter, Options, ExceptionDocumenter,
-    Documenter, prepare_docstring)
+    ALL,
+    AttributeDocumenter,
+    ClassDocumenter,
+    DataDocumenter,
+    Documenter,
+    ExceptionDocumenter,
+    ModuleDocumenter,
+    Options,
+)
+from sphinx.pycode import ModuleAnalyzer
+from sphinx.util.docstrings import prepare_docstring
+from sphinx.util.docutils import SphinxDirective
 import sphinx.ext.autodoc as ad
 
 signature = Signature = None
@@ -713,8 +721,29 @@ class AutoDocSummDirective(SphinxDirective):
         return node.children
 
 
+def _before_config_inited(app, config):
+    # Enable the legacy (``Documenter``) autodoc implementation
+    # for all users of the extension.
+    config.autodoc_use_legacy_class_based = True
+
+
+def _after_config_inited(app, config):
+    # make sure to allow inheritance when registering new documenters
+    registry = app.registry.documenters
+    for cls in [AutoSummClassDocumenter, AutoSummModuleDocumenter,
+                CallableAttributeDocumenter, NoDataDataDocumenter,
+                NoDataAttributeDocumenter, AutoSummExceptionDocumenter]:
+        if not issubclass(registry.get(cls.objtype), cls):
+            app.add_autodocumenter(cls, override=True)
+
+
 def setup(app):
     """setup function for using this module as a sphinx extension"""
+    # Run before sphinx.ext.autodoc._register_directives().
+    app.connect("config-inited", _before_config_inited, priority=400)
+    # Run after sphinx.ext.autodoc._register_directives().
+    app.connect("config-inited", _after_config_inited, priority=600)
+
     app.setup_extension('sphinx.ext.autosummary')
     app.setup_extension('sphinx.ext.autodoc')
     app.add_directive('autoclasssumm', AutoDocSummDirective)
@@ -728,14 +757,6 @@ def setup(app):
     AUTODOC_DEFAULT_OPTIONS.extend(
         [option for option in AutoSummClassDocumenter.option_spec
          if option not in AUTODOC_DEFAULT_OPTIONS])
-
-    # make sure to allow inheritance when registering new documenters
-    registry = app.registry.documenters
-    for cls in [AutoSummClassDocumenter, AutoSummModuleDocumenter,
-                CallableAttributeDocumenter, NoDataDataDocumenter,
-                NoDataAttributeDocumenter, AutoSummExceptionDocumenter]:
-        if not issubclass(registry.get(cls.objtype), cls):
-            app.add_autodocumenter(cls, override=True)
 
     # group event
     app.add_event('autodocsumm-grouper')

@@ -16,8 +16,11 @@ jobs:
       matrix:
         python-version: [ "3.10", "3.11", "3.12", "3.13" ]
         sphinx-version: [
-          "8.0.*", "8.*"  # 8.0.x and latest
+          "8.0.*", "9.*"  # 8.0.x and latest
         ]
+        exclude:
+          - python-version: "3.10"
+            sphinx-version: "9.*"
     uses: ./.github/workflows/build.yml
     with:
       python-version: ${{ matrix.python-version }}
